@@ -58,9 +58,9 @@ function updateStoreList(query = "", customData = null) {
   // Use filtered data if provided, otherwise use the full store list
   const dataToFilter = customData || storeData;
 
-  // Apply search filter
+  // Apply search filter (only show items that **start with** query)
   const filtered = dataToFilter.filter(
-    (item) => item.Store && item.Store.toLowerCase().includes(query.toLowerCase())
+    (item) => item.Store && item.Store.toLowerCase().startsWith(query.toLowerCase())
   );
 
   if (filtered.length === 0) {
@@ -84,8 +84,6 @@ function updateStoreList(query = "", customData = null) {
 
   storeListContainer.style.display = "block";
 }
-
-
 
 // Virtual Keyboard Object
 const Keyboard = {
