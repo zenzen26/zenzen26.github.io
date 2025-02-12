@@ -1,0 +1,241 @@
+/* Reset default margin and padding */
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #f0f0f0;
+}
+
+/* Center the container horizontally */
+.container {
+    display: flex;
+    justify-content: center;
+    width: 100vw; /* Full viewport width */
+    min-height: 100vh; /* Full viewport height */
+    overflow: auto; /* Allow scrolling */
+}
+
+/* Content box with fixed ratio */
+.content-box {
+    width: 405px;
+    height: 2159px;
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    transition: transform 1s ease-in-out; 
+}
+
+/* Section 1 styling */
+.section-1 {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border: 1px solid #ccc;
+    background-color: #000000;
+}
+
+.section-2, .section-3, .section-4 {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border: 1px solid #ccc;
+    transition: transform 0.8s ease-in-out;
+    
+}
+
+.reordered .section-4 {
+    order: -1; /* Moves Section 4 to the top */
+    transform: translateY(-100%);
+    transition: transform 0.8s ease-in-out;
+}
+
+/* Section-specific background colors */
+.section-2 { background-color: #e9e9e9; }
+.section-3 { background-color: #000000; }
+.section-4 { background-color: #c9c9c9; }
+
+/* Section content */
+.section-1 h1 {
+    font-family: Arial, sans-serif;
+    font-size: 5.5rem;
+    color: #ffffff;
+}
+
+.section-2 h1, .section-3 h1, .section-4 h1 {
+    font-family: Arial, sans-serif;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.section-1 p, .section-2 p, .section-3 p, .section-4 p {
+    font-family: Arial, sans-serif;
+    font-size: 1rem;
+    color: #666;
+}
+
+/* Text field styling */
+.text-field {
+    width: 70%;
+    height: 40px;
+    padding: 10px;
+    margin: 10px 0;
+    font-size: 1.5rem;
+    border: 1px solid #ccc;
+    border-radius: 30px;
+}
+
+/* Placeholder text styling */
+.text-field::placeholder {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: #3f3f3f;
+}
+
+/* Button rows and button styling */
+.button-row {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin: 15px 0;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+}
+
+.button-group button {
+    width: 70px;
+    height: 70px;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f0f0f0;
+    cursor: pointer;
+}
+
+.button-group button:hover {
+    background-color: #ccc;
+}
+
+/* Button styling */
+.search-button, .home-button, .category-button, .assist-button {
+    /* background-color: yellow; */
+    cursor: pointer;
+    width: 100%;
+    height: 60px;
+    padding: 10px;
+    margin: 10px 0;
+    font-size: 1.5rem;
+    border: 1px solid #ccc;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    color: #3f3f3f;
+}
+
+button:hover {
+    background-color: #dbdbdb;
+}
+
+/* Store List Styling */
+#store-list {
+    width: 100%;
+    height: 65%; /* Adjust height as needed */
+    overflow: hidden; 
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 10px;
+    box-sizing: border-box;
+    display: none; /* Hidden by default */
+}
+
+/* Store List Styling */
+#category-list {
+    width: 100%;
+    height: 100%;
+    overflow: hidden; 
+    overflow-y: auto;
+    background: #fff;
+    padding: 10px;
+    box-sizing: border-box;
+    display: none;
+}
+
+
+/* Display Container Styling */
+#display-container {
+    width: 100%;
+    height: 50px;
+    background-color: yellow;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    display: none; /* Hidden by default */
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0;
+}
+
+#display {
+    font-family: Arial, sans-serif;
+    font-size: 1.5rem;
+    color: #000;
+}
+
+/* Keyboard Placeholder Styling */
+#keyboard-placeholder {
+    width: 100%;
+    display: none; /* Hidden by default */
+}
+
+/* Toggle Visibility Classes */
+.hidden {
+    display: none;
+}
+
+.visible {
+    display: block;
+}
+
+.tab-item {
+    font-family: Arial, sans-serif;
+    font-size: 1.5rem;
+    display: block; /* Makes each tab span full width */
+    margin: 1px 0; /* Adds space between rows */
+    cursor: pointer;
+    background-color: #f1f1f1;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    text-align: center; /* Center the text */
+    width: 100%; /* Ensure full width */
+    padding-top: 15px;
+    padding-bottom: 15px;
+  }
+  
+  .tab-item:hover {
+    background-color: #e1e1e1;
+  }
+  
+  .active-tab {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+  }
+  
+  /* Make sure the category list container is hidden initially */
+  #category-list {
+    display: none;
+  }
+  

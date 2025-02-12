@@ -1,0 +1,113 @@
+/* Basic layout */
+body, html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #f0f0f0;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  width: 100vw;
+  min-height: 100vh;
+  overflow: auto;
+}
+
+.content-box {
+  width: 405px;
+  background-color: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Section 2 styling */
+.section-2 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  min-height: 600px;
+}
+
+#map-container {
+  transition: opacity 0.3s ease;
+}
+
+/* Display area for typed text */
+#display-container {
+  width: 100%;
+  max-width: 405px;
+  margin-bottom: 10px;
+  background: #ffffff;
+  border: 1px solid #ccc;
+  padding: 10px;
+  font-size: 18px;
+  text-align: left;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+/* Keyboard styling */
+.keyboard {
+  width: 100%;
+  max-width: 405px; /* Ensure the keyboard stays within the section width */
+  background: #aaaaaa;
+  transition: all 0.4s;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.keyboard--hidden {
+  display: none;
+}
+
+.keyboard__keys {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Key buttons */
+.keyboard__key {
+  height: 25px;
+  width: 35px;
+  margin: 2px;
+  border-radius: 5px;
+  border: none;
+  background: rgba(255, 255, 255, 0.671);
+  color: rgb(0, 0, 0);
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-transform: uppercase;
+}
+
+.keyboard__key:active {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Wide keys */
+.keyboard__key--wide {
+  width: 80px;
+}
+
+/* Extra wide key */
+.keyboard__key--extra-wide {
+  width: 200px;
+}
+
+
+/* Button toggles */
+.hidden {
+  display: none !important;
+}

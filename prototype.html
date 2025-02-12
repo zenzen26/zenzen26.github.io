@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="cache-control" content="no-cache">
+    <meta http-equiv="expires" content="0">
+    <title>Fish Market Directory</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="search.css" />
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="content-box">
+            <!-- First Section -->
+            <div class="section-1">
+                <div class="content">
+                    <h1>UG</h1>
+                </div>
+            </div>
+
+            <!-- Second Section (Map / Keyboard Toggle) -->
+            <div class="section-2">
+                <div id="map-container" class="map-container">
+                    <iframe 
+                        id="google-map"
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3312.650112660483!2d151.19016957570872!3d-33.872906973224985!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6b12ae3175fe2fab%3A0xc12305e1f19e11b4!2sSydney%20Fish%20Market!5e0!3m2!1sen!2sau!4v1738626620262!5m2!1sen!2sau"
+                        width="405"
+                        height="670.3"
+                        style="border:0;"
+                        allowfullscreen
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+
+                <div id="store-list" class="store-list"></div>
+                <div id="category-list" class="category-list" style="display: none;"></div>
+                <div id="display-container" class="display-container" style="display: none;">
+                    <div id="display" class="display"></div>
+                </div>
+                <div id="keyboard-placeholder"></div>
+                <script src="search.js"></script>
+            </div>
+
+            <!-- Third Section (Search Bar / Home Button Toggle) -->
+            <div class="section-3">
+                <div class="content">
+                    <button id="search-button" class="search-button">Search</button>
+                    <button id="home-button" class="home-button hidden">Home</button>
+                    <button id="category-button" class="category-button"> Categories </button>
+
+                    <div class="button-row">
+                        <div class="button-group">
+                            <button>Button 1</button>
+                            <button>Button 2</button>
+                            <button>Button 3</button>
+                            <button>Button 4</button>
+                        </div>
+                    </div>
+                    <div class="button-row">
+                        <div class="button-group">
+                            <button>Button 5</button>
+                            <button>Button 6</button>
+                            <button>Button 7</button>
+                            <button>Button 8</button>
+                        </div>
+                    </div>
+                    <button id="assist-button" class="assist-button"> Accessible Assistance </button>
+                </div>
+            </div>
+
+            <!-- Fourth Section -->
+            <div class="section-4">
+                <div class="content">
+                    <h1>Section 4</h1>
+                    <p>Some random texts.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+        const assistButton = document.getElementById("assist-button");
+        const container = document.querySelector(".content-box");
+
+        const section1 = document.querySelector(".section-1");
+        const section2 = document.querySelector(".section-2");
+        const section3 = document.querySelector(".section-3");
+        const section4 = document.querySelector(".section-4");
+
+        let isReordered = false; // Track current state
+        let timeoutId; // Store timeout ID
+
+        function reorderSections() {
+            console.log("Accessible Assistance clicked!");
+
+            if (isReordered) {
+                // Restore original order
+                container.appendChild(section1);
+                container.appendChild(section2);
+                container.appendChild(section3);
+                container.appendChild(section4);
+                console.log("Sections restored to original order.");
+            } else {
+                // Move Section 4 to the top
+                container.appendChild(section4);
+                container.appendChild(section2);
+                container.appendChild(section3);
+                console.log("Sections reordered.");
+                
+                // Set timeout to switch back after 10 seconds
+                timeoutId = setTimeout(() => {
+                    reorderSections(); // Automatically switch back
+                }, 10000);
+            }
+
+            isReordered = !isReordered; // Toggle state
+        }
+
+        assistButton.addEventListener("click", function () {
+            clearTimeout(timeoutId); // Prevent auto-reset if user clicks manually
+            reorderSections();
+        });
+    });
+
+    </script>
+
+</body>
+</html>
