@@ -95,14 +95,7 @@ const Keyboard = {
 
   properties: {
     value: "",
-    capsLock: false,
-    keyLayout: [
-      "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "backspace",
-      "q", "w", "e", "r", "t", "y", "u", "i", "o", "p",
-      "a", "s", "d", "f", "g", "h", "j", "k", "l", "'",
-      "z", "x", "c", "v", "b", "n", "m", ",", ".",
-      "space"
-    ],
+    capsLock: false
   },
 
   init() {
@@ -163,7 +156,7 @@ const Keyboard = {
 
             case "space":
                 // Create a space button, extra wide
-                keyElement = this._createKeyBtn("Space", "keyboard__key--extra-wide", () => {
+                keyElement = this._createKeyBtn("", "keyboard__key--extra-wide", () => {
                     this.properties.value += " ";
                     this._updateValueInTarget();
                 });
@@ -182,7 +175,7 @@ const Keyboard = {
                     rows[0].push(keyElement); // First row (1-0, backspace)
                 } else if (index < 21) {
                     rows[1].push(keyElement); // Second row (q-p)
-                } else if (index < 32) {
+                } else if (index < 31) {
                     rows[2].push(keyElement); // Third row (a-l, ')
                 } else if (index < 41) {
                     rows[3].push(keyElement); // Fourth row (z-m, ", .")
@@ -193,9 +186,14 @@ const Keyboard = {
 
     // Append rows with line breaks
     rows.forEach((row) => {
-        row.forEach((key) => fragment.appendChild(key));
-        fragment.appendChild(document.createElement("br"));
-    });
+      if (row.length) {
+          const rowDiv = document.createElement("div");
+          rowDiv.classList.add("keyboard__row"); // Ensure proper styling
+          row.forEach((key) => rowDiv.appendChild(key));
+          fragment.appendChild(rowDiv);
+      }
+  });
+
 
     return fragment;
 },
@@ -284,27 +282,63 @@ window.addEventListener("DOMContentLoaded", function () {
   searchButton.addEventListener("click", toggleKeyboard);
   homeButton.addEventListener("click", toggleKeyboard);
 });
+document.addEventListener("DOMContentLoaded", function () {
+  const assistButton = document.getElementById("assist-button");
+  const assistReturnButton = document.getElementById("assist-return-button");
+  const container = document.querySelector(".content-box");
 
-document.getElementById("assist-button").addEventListener("click", function () {
-  console.log("assistance clicked");
-  
-  const container = document.getElementById("sections-container");
+  const section1 = document.querySelector(".section-1");
+  const section2 = document.querySelector(".section-2");
+  const section3 = document.querySelector(".section-3");
+  const section4 = document.querySelector(".section-4");
 
-  // Get section elements
-  const section2 = document.getElementById("section-2");
-  const section3 = document.getElementById("section-3");
-  const section4 = document.getElementById("section-4");
+  let isReordered = false; // Track current state
+  let timeoutId; // Store timeout ID
 
-  // Store original order for reverting back
-  const originalOrder = [section2, section3, section4];
+  function reorderSections() {
+      if (isReordered) {
+          // Restore original order
+          container.appendChild(section1);
+          container.appendChild(section2);
+          container.appendChild(section3);
+          container.appendChild(section4);
+          assistButton.style.display = "block";
+          assistReturnButton.style.display = "none";
+      } else {
+          // Move Section 4 to the top
+          container.appendChild(section4);
+          container.appendChild(section2);
+          container.appendChild(section3);
+          assistButton.style.display = "none";
+          assistReturnButton.style.display = "block";
+      }
 
-  // Change order dynamically by appending
-  container.appendChild(section4); // Move section 4 to the top
-  container.appendChild(section2); // Move section 2 next
-  container.appendChild(section3); // Move section 3 to the bottom
+      isReordered = !isReordered; // Toggle state
+  }
 
-  // Revert back after 10 seconds
-  setTimeout(() => {
-    originalOrder.forEach((section) => container.appendChild(section));
-  }, 10000);
+  assistButton.addEventListener("click", function () {
+      reorderSections();
+  });
+
+  assistReturnButton.addEventListener("click", function () {
+    reorderSections();
+  });
+
+
+  document.getElementById("chinese-button").addEventListener("click", function () {
+    document.getElementById("assist-button").textContent = "无障碍援助";
+    document.getElementById("assist-return-button").textContent = "默认配置";
+    document.getElementById("category-button").textContent = "类别";
+    document.getElementById("search-button").textContent = "搜索";
+    document.getElementById("home-button").textContent = "主页";
+  }); 
+
+  document.getElementById("english-button").addEventListener("click", function () {
+    document.getElementById("assist-button").textContent = "Accessible Assistance";
+    document.getElementById("assist-return-button").textContent = "Return to Default";
+    document.getElementById("category-button").textContent = "Category";
+    document.getElementById("search-button").textContent = "Search";
+    document.getElementById("home-button").textContent = "Home";
+  }); 
+
 });
