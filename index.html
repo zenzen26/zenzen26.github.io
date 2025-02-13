@@ -63,11 +63,12 @@
                         <div class="button-group">
                             <button>Button 5</button>
                             <button>Button 6</button>
-                            <button>Button 7</button>
-                            <button>Button 8</button>
+                            <button id="english-button">ENG</button>
+                            <button id="chinese-button">中文</button>
                         </div>
                     </div>
                     <button id="assist-button" class="assist-button"> Accessible Assistance </button>
+                    <button id="assist-return-button" class="assist-button" style="display: none;"> Return to Default </button>
                 </div>
             </div>
 
@@ -82,50 +83,6 @@
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-        const assistButton = document.getElementById("assist-button");
-        const container = document.querySelector(".content-box");
-
-        const section1 = document.querySelector(".section-1");
-        const section2 = document.querySelector(".section-2");
-        const section3 = document.querySelector(".section-3");
-        const section4 = document.querySelector(".section-4");
-
-        let isReordered = false; // Track current state
-        let timeoutId; // Store timeout ID
-
-        function reorderSections() {
-            console.log("Accessible Assistance clicked!");
-
-            if (isReordered) {
-                // Restore original order
-                container.appendChild(section1);
-                container.appendChild(section2);
-                container.appendChild(section3);
-                container.appendChild(section4);
-                console.log("Sections restored to original order.");
-            } else {
-                // Move Section 4 to the top
-                container.appendChild(section4);
-                container.appendChild(section2);
-                container.appendChild(section3);
-                console.log("Sections reordered.");
-                
-                // Set timeout to switch back after 10 seconds
-                timeoutId = setTimeout(() => {
-                    reorderSections(); // Automatically switch back
-                }, 10000);
-            }
-
-            isReordered = !isReordered; // Toggle state
-        }
-
-        assistButton.addEventListener("click", function () {
-            clearTimeout(timeoutId); // Prevent auto-reset if user clicks manually
-            reorderSections();
-        });
-    });
-
     </script>
 
 </body>
