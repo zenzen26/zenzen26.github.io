@@ -281,8 +281,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
   searchButton.addEventListener("click", toggleKeyboard);
   homeButton.addEventListener("click", toggleKeyboard);
-});
-document.addEventListener("DOMContentLoaded", function () {
+
   const assistButton = document.getElementById("assist-button");
   const assistReturnButton = document.getElementById("assist-return-button");
   const container = document.querySelector(".content-box");
@@ -340,5 +339,5 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("search-button").textContent = "Search";
     document.getElementById("home-button").textContent = "Home";
   }); 
-
 });
+
