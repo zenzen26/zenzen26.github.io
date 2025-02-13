@@ -77,14 +77,14 @@ body, html {
 
 /* Key buttons */
 .keyboard__key {
-  height: 25px;
-  width: 35px;
+  height: 20px;
+  width: 30px;
   margin: 2px;
   border-radius: 5px;
   border: none;
   background: rgba(255, 255, 255, 0.671);
   color: rgb(0, 0, 0);
-  font-size: 1.2rem;
+  font-size: 0.8rem;
   cursor: pointer;
   display: flex;
   justify-content: center;
@@ -98,12 +98,18 @@ body, html {
 
 /* Wide keys */
 .keyboard__key--wide {
-  width: 80px;
+  width: 50px;
 }
 
 /* Extra wide key */
 .keyboard__key--extra-wide {
-  width: 200px;
+  width: 250px;
+}
+
+.keyboard__row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1px; /* Adjust spacing between rows */
 }
 
 
