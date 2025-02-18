@@ -16,7 +16,7 @@ body, html {
 }
 
 .content-box {
-  width: 405px;
+  width: 592px;
   background-color: #ffffff;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   display: flex;
@@ -31,7 +31,7 @@ body, html {
   align-items: center;
   position: relative;
   width: 100%;
-  min-height: 600px;
+  min-height: 1200px;
 }
 
 #map-container {
@@ -41,8 +41,7 @@ body, html {
 /* Display area for typed text */
 #display-container {
   width: 100%;
-  max-width: 405px;
-  margin-bottom: 10px;
+  max-width: 592px;
   background: #ffffff;
   border: 1px solid #ccc;
   padding: 10px;
@@ -56,7 +55,7 @@ body, html {
 /* Keyboard styling */
 .keyboard {
   width: 100%;
-  max-width: 405px; /* Ensure the keyboard stays within the section width */
+  max-width: 592px; /* Ensure the keyboard stays within the section width */
   background: #aaaaaa;
   transition: all 0.4s;
   display: flex;
@@ -77,14 +76,14 @@ body, html {
 
 /* Key buttons */
 .keyboard__key {
-  height: 20px;
-  width: 30px;
+  height: 40px;
+  width: 50px;
   margin: 2px;
   border-radius: 5px;
   border: none;
   background: rgba(255, 255, 255, 0.671);
   color: rgb(0, 0, 0);
-  font-size: 0.8rem;
+  font-size: 1rem;
   cursor: pointer;
   display: flex;
   justify-content: center;
@@ -103,7 +102,7 @@ body, html {
 
 /* Extra wide key */
 .keyboard__key--extra-wide {
-  width: 250px;
+  width: 300px;
 }
 
 .keyboard__row {
