@@ -98,7 +98,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="min-h-screen pt-20 lg:pt-0 flex items-center bg-white overflow-hidden">
+    <section className="min-h-screen pt-20 lg:pt-0 flex items-center overflow-hidden">
       <div className="max-w-[1920px] mx-auto w-full px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 4xl:px-24">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center min-h-[calc(100vh-5rem)] lg:min-h-screen">
           

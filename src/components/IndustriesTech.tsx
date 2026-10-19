@@ -51,7 +51,7 @@ export default function IndustriesTechStack({ showTitle = true, className = '' }
   }, []);
 
   return (
-    <section ref={sectionRef} className={`py-20 sm:py-24 md:py-32 bg-white ${className}`}>
+    <section ref={sectionRef} className={`py-20 sm:py-24 md:py-32 ${className}`}>
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 4xl:px-24">
         
         {/* Industries */}
@@ -68,7 +68,7 @@ export default function IndustriesTechStack({ showTitle = true, className = '' }
             {industries.map((industry) => (
               <div
                 key={industry.name}
-                className={`industry-card ${bgTextColorMap[industry.color]} p-6 text-center border-2 border-black transform transition-all duration-300 hover:-translate-y-2 hover:rotate-2 hover:shadow-lg cursor-default`}
+                className={`industry-card ${bgTextColorMap[industry.color]} p-6 text-center border-2 border-black sketch-box transform transition-all duration-300 hover:-translate-y-2 hover:rotate-2 hover:shadow-lg cursor-default`}
               >
                 <h3 className="h4 mb-2">{industry.name}</h3>
                 <p className="b3 opacity-80">{industry.tagline}</p>
@@ -91,7 +91,7 @@ export default function IndustriesTechStack({ showTitle = true, className = '' }
             {Object.entries(skills).map(([category, data]) => (
               <div 
                 key={category} 
-                className={`skill-category ${borderColorMap[data.color]} border-2 p-6 bg-gray-50`}
+                className={`skill-category ${borderColorMap[data.color]} border-2 p-6 bg-paper-dark sketch-box`}
               >
                 <h3 className="h4 pb-2">{category}</h3>
                 <div className="flex flex-wrap gap-2">

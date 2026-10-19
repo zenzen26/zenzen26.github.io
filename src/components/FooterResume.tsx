@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, Github, Linkedin, LayoutDashboard, Download } from 'lucide-react';
+import { Mail, Phone, MapPin, Github, Linkedin, LayoutDashboard, Download, PawPrint } from 'lucide-react';
 
 const resumes = [
   { name: 'All', color: 'black', focus: 'All in One', file: '/resumes/Resume All - Zi En Tham.pdf' },
@@ -36,8 +36,8 @@ export default function FooterResume() {
           
           <div>
             <div className="mb-8">
-              <h2 className="h2 text-amber">
-                Coffee Chat?
+              <h2 className="h2 text-amber flex items-center gap-3">
+                <PawPrint size={36} /> Coffee Chat?
               </h2>
             </div>
             
@@ -93,7 +93,7 @@ export default function FooterResume() {
         </div>
 
         <div className="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="h4 text-amber">ZENZEN</p>
+          <p className="h4 text-amber">ZENZEN <span className="text-white/60">ฅ^•ﻌ•^ฅ</span></p>
           <p className="b3 text-white/40">
             © {new Date().getFullYear()} All rights reserved.
           </p>

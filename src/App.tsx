@@ -5,6 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import Navigation from '@/components/Navigation';
 import PageLoader from '@/components/ui/PageLoader';
+import CatPeek from '@/components/ui/CatPeek';
 
 // Page-level code splitting: each page (and its heavy deps) is loaded on
 // demand only when its route is visited.
@@ -35,7 +36,8 @@ function App() {
   return (
     <Router>
       <ScrollToTop />
-      <div className="min-h-screen bg-white overflow-x-hidden">
+      <CatPeek />
+      <div className="min-h-screen overflow-x-hidden">
         <Navigation />
         <Suspense fallback={<PageLoader />}>
           <Routes>

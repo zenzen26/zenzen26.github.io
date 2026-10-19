@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { GraduationCap, Mail, Globe, ShieldCheck } from 'lucide-react';
+import { GraduationCap, Mail, Globe, ShieldCheck, PawPrint } from 'lucide-react';
 import FeaturedProjects from '@/components/FeaturedProjects';
 import IndustriesTech from '@/components/IndustriesTech';
 import StickyExperience from '@/components/StickyExperience';
+import PageLoader from '@/components/ui/PageLoader';
 import FooterResume from '@/components/FooterResume';
 import StickyAnchor from '@/components/StickyAnchor';
 import Container from '@/components/ui/Container';
@@ -31,11 +32,7 @@ export default function Home() {
   }, [projectsLoading, expLoading]);
 
   if (projectsLoading || expLoading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="h2 animate-pulse text-amber">Loading...</div>
-      </div>
-    );
+    return <PageLoader withNavOffset={false} />;
   }
 
   const featuredProjects = projects
@@ -48,14 +45,14 @@ export default function Home() {
       <StickyAnchor />
 
       {/* Hero — photo in amber frame (replaces the former Spline crystal) */}
-      <section id="hero" className="min-h-screen pt-20 lg:pt-0 flex items-center bg-white overflow-hidden">
+      <section id="hero" className="min-h-screen pt-20 lg:pt-0 flex items-center overflow-hidden">
         <div className="max-w-[1920px] mx-auto w-full px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 4xl:px-24">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center min-h-[calc(100vh-5rem)] lg:min-h-screen">
 
             {/* Photo */}
             <div className="lg:col-span-6 relative order-2 lg:order-1">
               <div className="relative">
-                <div className="bg-amber aspect-[4/5] max-w-md mx-auto relative overflow-hidden border-4 border-black shadow-2xl transform -rotate-2">
+                <div className="bg-amber aspect-[4/5] max-w-md mx-auto relative overflow-hidden border-4 border-black sketch-box shadow-2xl transform -rotate-2">
                   <div className="absolute inset-0 bg-gradient-to-br from-amber to-[#FF8800]" />
                   <img src="/images/cat.webp" alt="Zenzen" className="absolute inset-0 w-full h-full object-cover" />
                   <div className="absolute bottom-0 left-0 right-0 bg-white p-6 text-center">
@@ -119,11 +116,11 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="projects" className="py-20 bg-white">
+      <section id="projects" className="py-20">
         <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 4xl:px-24">
           <div className="mb-10 text-center">
-            <h2 className="h2">
-              Featured <span className="text-amber">Projects</span>
+            <h2 className="h2 inline-flex items-center gap-3">
+              <PawPrint className="text-amber" size={36} /> Featured <span className="text-amber">Projects</span>
             </h2>
           </div>
           <FeaturedProjects projects={featuredProjects} />
@@ -133,9 +130,9 @@ export default function Home() {
       <IndustriesTech />
 
       {/* Personal Details (moved from the former About page, placed below Tech Stack) */}
-      <section className="py-16 sm:py-20 bg-gray-50">
+      <section className="py-16 sm:py-20 bg-paper-dark">
         <Container>
-          <h2 className="h3 mb-8">Personal Details</h2>
+          <h2 className="h3 mb-8 flex items-center gap-3"><PawPrint className="text-amber" size={32} /> Personal Details</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { icon: <Globe size={24} className="text-green" />, title: 'Languages', items: personalDetails.languages },
@@ -143,7 +140,7 @@ export default function Home() {
               { icon: <GraduationCap size={24} className="text-red" />, title: 'Education', items: [personalDetails.education] },
               { icon: <Mail size={24} className="text-black" />, title: 'Contact', items: personalDetails.contact },
             ].map(({ icon, title, items }) => (
-              <div key={title} className="border-2 border-black p-6 bg-white">
+              <div key={title} className="border-2 border-black p-6 bg-white sketch-box">
                 <div className="flex items-center gap-5 mb-3">
                   {icon}
                   <h4 className="h4">{title}</h4>

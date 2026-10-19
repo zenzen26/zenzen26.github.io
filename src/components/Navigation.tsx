@@ -51,7 +51,7 @@ export default function Navigation() {
   return (
     <>
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-white/95 backdrop-blur-sm shadow-sm' : 'bg-white'
+        isScrolled ? 'bg-paper/95 backdrop-blur-sm shadow-sm' : 'bg-paper'
       } paper-texture`}>
         <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 4xl:px-24">
           <div className="flex items-center justify-between h-16 md:h-20">
@@ -73,7 +73,7 @@ export default function Navigation() {
                     className={`relative px-4 py-2 font-share-tech text-sm xl:text-base transition-all duration-300 transform cursor-pointer ${
                       location.hash === '#footer'
                         ? 'bg-amber text-black -translate-y-1 shadow-md' 
-                        : 'hover:-translate-y-0.5 hover:bg-gray-100'
+                        : 'hover:-translate-y-0.5 hover:bg-paper-dark'
                     }`}
                   >
                     {link.name}
@@ -85,7 +85,7 @@ export default function Navigation() {
                     className={`relative px-4 py-2 font-share-tech text-sm xl:text-base transition-all duration-300 transform ${
                       location.pathname === link.href
                         ? 'bg-amber text-black -translate-y-1 shadow-md' 
-                        : 'hover:-translate-y-0.5 hover:bg-gray-100'
+                        : 'hover:-translate-y-0.5 hover:bg-paper-dark'
                     }`}
                   >
                     {link.name}
@@ -106,7 +106,7 @@ export default function Navigation() {
 
       {/* Mobile Menu Overlay */}
       <div 
-        className={`lg:hidden fixed inset-0 bg-white z-[60] transform transition-transform duration-300 ${
+        className={`lg:hidden fixed inset-0 bg-paper z-[60] transform transition-transform duration-300 ${
           isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
         style={{ top: '64px' }}

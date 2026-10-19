@@ -82,7 +82,7 @@ export default function Projects() {
           </div>
 
           {/* Sticky filters */}
-          <div className="flex flex-col gap-4 mb-6 sticky top-20 bg-white/95 backdrop-blur-sm py-4 z-30 border-b-2 border-black/5">
+          <div className="flex flex-col gap-4 mb-6 sticky top-20 bg-paper/95 backdrop-blur-sm py-4 z-30 border-b-2 border-black/5">
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center flex-wrap">
               {/* Search */}
               <div className="relative flex-1 max-w-md w-full">

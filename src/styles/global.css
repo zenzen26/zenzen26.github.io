@@ -51,6 +51,8 @@ canvas {
   --color-red: #DA3D20;
   --color-black: #000000;
   --color-white: #FFFFFF;
+  --color-paper: #FBF6EA;
+  --color-paper-dark: #F1E9D6;
   --font-permanent-marker: "Permanent Marker", cursive;
   --font-share-tech: "Share Tech Mono", monospace;
   --breakpoint-4xl: 1920px;
@@ -80,6 +82,18 @@ body, .b1, .b2, .b3, p, span, div, a, button, input, textarea, select, label {
 .b2 { font-size: clamp(14px, 0.5vw + 12px, 18px); line-height: 1.6; }
 .b3 { font-size: clamp(12px, 0.3vw + 10px, 14px); line-height: 1.5; }
 
+/* Sketch-journal page: cream paper with faint ruled notebook lines */
+body {
+  background-color: var(--color-paper);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 31px,
+    rgb(120 160 190 / 0.18) 31px,
+    rgb(120 160 190 / 0.18) 32px
+  );
+}
+
 body {
   font-size: clamp(14px, 0.5vw + 12px, 18px);
   line-height: 1.6;
@@ -102,12 +116,18 @@ body {
   .animate-pulse-rotate { animation: none; }
 }
 
+/* Hand-drawn, slightly wobbly box edges (cards, frames, modals). */
+@utility sketch-box {
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+}
+
 /* ------------------------------------------------------------
    Shared component utility: taped-card
    Used by more than one component (ProjectCard, ModalOverlay),
    so it stays in the shared global stylesheet.
    ------------------------------------------------------------ */
 .taped-card {
+  @apply sketch-box;
   background: white;
   border: 2px solid black;
   position: relative;

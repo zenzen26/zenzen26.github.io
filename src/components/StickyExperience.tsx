@@ -81,7 +81,7 @@ export default function StickyExperience({ experiences, showEndCard = true }: St
     <>
       <section
         ref={sectionRef}
-        className="bg-gray-50 md:overflow-hidden"
+        className="bg-paper-dark md:overflow-hidden"
       >
         <div className="flex flex-col justify-center py-20 md:h-screen">
 

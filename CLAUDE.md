@@ -1,0 +1,48 @@
+# Claude rules — zenzen-portfolio
+
+Instructions Claude reads automatically when working in this repo
+(React 19 + TypeScript + Vite + Tailwind v4 + GSAP + lucide-react).
+
+## Rule #1 — Reuse before you create (applies to everything below)
+
+Applies to **CSS classes, Tailwind utility patterns, React components, hooks,
+helper functions, and animation code** alike. Do not create a new class,
+component, file, or helper unless you have to.
+
+1. **Search first.** Look for an existing component (`src/components/`,
+   `src/components/ui/`), hook (`src/hooks/`), helper (`src/lib/`,
+   `src/utils/`), or CSS class/utility (`src/styles/global.css`, co-located
+   `*.css`) that already does the job. Use it as-is if it fits. Check
+   `lucide-react` before drawing a new icon.
+2. **Extend, don't fork.** If it almost fits, add a prop / variant / modifier
+   to the existing base (e.g. a new `ProjectCard` prop, a new `@utility`
+   composed via `@apply`) rather than writing a parallel copy.
+3. **Promote repeats.** If the pattern you need is (or would become) used in
+   3+ places and no base exists, create the **base component / utility
+   first** (in `components/ui/` or `global.css`), then build the variant on
+   top of it. Do not hand-roll the same markup or utility string again.
+4. **One-offs stay inline** — plain Tailwind utilities, no new class, no new
+   file.
+5. Before adding CSS, ask: can existing Tailwind utilities + theme tokens do
+   this? Only write CSS for things utilities can't express (keyframes,
+   multi-property patterns reused 3+ times).
+
+## Conventions
+
+- **Theme tokens, not raw values**: colours/fonts live in the `@theme` block
+  of `src/styles/global.css` (`amber`, `green`, `red`, `paper`, …). Use
+  `bg-amber`, `fill-black`, `text-black/70` — never `#hex` in markup.
+- **Where CSS goes**: shared (used by 2+ components) → `global.css`; used by
+  one component → co-located `Component.css`.
+- **Typography**: headings use `h1–h4`, body uses `b1–b3` (see `global.css`).
+  Don't add inline font-size utilities for these.
+- **Path alias**: import with `@/…`.
+- **Animation**: GSAP, created inside `gsap.context()` and reverted on
+  cleanup; honour `prefers-reduced-motion`.
+- **Data**: projects/experience come from `public/data/*.csv` via
+  `useCSVData`.
+
+## Build / verify
+
+- `npm run build` (runs `vite build`); type-check with `npx tsc -p tsconfig.app.json --noEmit`.
+- `npm run dev` for the dev server.
