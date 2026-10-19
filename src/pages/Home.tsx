@@ -116,7 +116,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="projects" className="py-20">
+      <section id="projects" className="py-20 bg-amber/10">
         <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 4xl:px-24">
           <div className="mb-10 text-center">
             <h2 className="h2 inline-flex items-center gap-3">
@@ -130,7 +130,7 @@ export default function Home() {
       <IndustriesTech />
 
       {/* Personal Details (moved from the former About page, placed below Tech Stack) */}
-      <section className="py-16 sm:py-20 bg-paper-dark">
+      <section className="py-16 sm:py-20 bg-green/10">
         <Container>
           <h2 className="h3 mb-8 flex items-center gap-3"><PawPrint className="text-amber" size={32} /> Personal Details</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
