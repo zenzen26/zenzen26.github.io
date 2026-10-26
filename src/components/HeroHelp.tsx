@@ -6,7 +6,7 @@ const CONTROLS = [
   { icon: Power, label: 'Power', text: 'screen off / on (reboots)' },
   { icon: Sun, label: 'Bright', text: 'cycle screen brightness' },
   { icon: Save, label: 'Eject', text: 'pop the floppy out' },
-  { icon: Keyboard, label: 'Keys', text: 'type on the screen' },
+  { icon: Keyboard, label: 'Keys', text: 'type help + Enter' },
   { icon: MousePointerClick, label: 'Screen', text: 'buttons jump to a section' },
 ];
 

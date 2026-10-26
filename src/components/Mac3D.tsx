@@ -7,9 +7,11 @@ import PixelCat from '@/components/ui/PixelCat';
 import { themeColor } from '@/lib/pixelCat';
 import { RESET_VIEW_EVENT } from '@/lib/viewReset';
 
-/** Rotation limit on each axis (±25°); resting poses snap to 12.5° steps. */
-const LIMIT = (25 * Math.PI) / 180;
-const SNAP_STEP = (12.5 * Math.PI) / 180;
+/** Turn limit ±25° left/right, only ±8° up/down; resting poses snap to 12.5° / 4° steps. */
+const LIMIT_Y = (25 * Math.PI) / 180;
+const LIMIT_X = (8 * Math.PI) / 180;
+const SNAP_STEP_Y = (12.5 * Math.PI) / 180;
+const SNAP_STEP_X = (4 * Math.PI) / 180;
 const IDLE_RETURN_MS = 5000;
 const BOOT_MS = 1600;
 const BRIGHTNESS = [0.55, 0.8, 1];
@@ -29,11 +31,13 @@ interface ScreenState {
   on: boolean;
   bootStart: number;
   typed: string;
+  /** Result line of the last command typed on the keyboard. */
+  output: string;
   hover: string | null;
 }
 
 const clamp = (v: number, limit: number) => Math.max(-limit, Math.min(limit, v));
-const snap = (v: number) => clamp(Math.round(v / SNAP_STEP) * SNAP_STEP, LIMIT);
+const snap = (v: number, step: number, limit: number) => clamp(Math.round(v / step) * step, limit);
 
 /** Paints the CRT: boot log, then the hero content with clickable buttons and a typing prompt. */
 function drawScreen(ctx: CanvasRenderingContext2D, s: ScreenState, cursorOn: boolean) {
@@ -116,13 +120,18 @@ function drawScreen(ctx: CanvasRenderingContext2D, s: ScreenState, cursorOn: boo
       ctx.textAlign = 'left';
     });
 
-    // typing prompt
+    // command line: last result above, prompt below
+    if (s.output) {
+      ctx.fillStyle = light;
+      ctx.font = '30px "VT323", monospace';
+      ctx.fillText(s.output, 40, 524);
+    }
     ctx.fillStyle = phosphor;
     ctx.font = '34px "VT323", monospace';
-    ctx.fillText(`> ${s.typed}${cursorOn ? '_' : ' '}`, 40, 550);
-    if (!s.typed) {
+    ctx.fillText(`> ${s.typed}${cursorOn ? '_' : ' '}`, 40, 566);
+    if (!s.typed && !s.output) {
       ctx.fillStyle = 'rgba(236,233,221,0.45)';
-      ctx.fillText('(try the keyboard)', 150, 550);
+      ctx.fillText('(type "help" then ENTER)', 150, 566);
     }
   }
 
@@ -263,10 +272,40 @@ function Caption({ text, position }: { text: string; position: [number, number, 
 }
 
 const KEY_ROWS = ['qwertyuiop', 'asdfghjkl;', 'zxcvbnm,./'];
+const KEY_PITCH = 0.26;
+const KEY_DEPTH = 0.22;
 
-function Key({ char, x, z, width = 0.22, onPress }: { char: string; x: number; z: number; width?: number; onPress: (c: string) => void }) {
+/** Letter printed on a keycap, painted once the pixel font is ready. */
+function useKeyLabel(text: string, aspect: number) {
+  const texture = useMemo(() => {
+    const c = document.createElement('canvas');
+    c.width = Math.round(64 * aspect);
+    c.height = 64;
+    return new CanvasTexture(c);
+  }, [aspect]);
+  useEffect(() => {
+    if (!text.trim()) return;
+    const paint = () => {
+      const c = texture.image as HTMLCanvasElement;
+      const g = c.getContext('2d')!;
+      g.clearRect(0, 0, c.width, c.height);
+      g.fillStyle = themeColor('ink');
+      g.font = `700 ${text.length > 1 ? 28 : 46}px "Pixelify Sans", monospace`;
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.fillText(text.toUpperCase(), c.width / 2, c.height / 2 + 2);
+      texture.needsUpdate = true;
+    };
+    document.fonts.load('700 28px "Pixelify Sans"').finally(paint);
+  }, [text, texture]);
+  return texture;
+}
+
+/** One keycap. `char` is what it types ("\n" = Enter, "\b" = Delete); `label` is what is printed on it. */
+function Key({ char, label = char, x, z, width = 0.22, onPress }: { char: string; label?: string; x: number; z: number; width?: number; onPress: (c: string) => void }) {
   const mesh = useRef<Mesh>(null);
   const [hover, setHover] = useState(false);
+  const labelTexture = useKeyLabel(label, width / KEY_DEPTH);
   useCursor(hover);
 
   const press = (e: ThreeEvent<MouseEvent>) => {
@@ -284,8 +323,14 @@ function Key({ char, x, z, width = 0.22, onPress }: { char: string; x: number; z
       onPointerOver={(e) => { e.stopPropagation(); setHover(true); }}
       onPointerOut={() => setHover(false)}
     >
-      <boxGeometry args={[width, 0.08, 0.22]} />
+      <boxGeometry args={[width, 0.08, KEY_DEPTH]} />
       <meshStandardMaterial color={hover ? themeColor('phosphor') : themeColor('beige-light')} roughness={0.6} />
+      {label.trim() && (
+        <mesh position={[0, 0.041, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[width * 0.9, KEY_DEPTH * 0.9]} />
+          <meshBasicMaterial map={labelTexture} transparent toneMapped={false} />
+        </mesh>
+      )}
     </mesh>
   );
 }
@@ -323,7 +368,7 @@ function PushButton({ position, size = 0.18, color, glyph, onPress }: { position
 }
 
 function MacModel() {
-  const ui = useRef<ScreenState>({ on: true, bootStart: performance.now(), typed: '', hover: null });
+  const ui = useRef<ScreenState>({ on: true, bootStart: performance.now(), typed: '', output: '', hover: null });
   const { texture } = useScreen(ui);
   const [power, setPower] = useState(true);
   const [bright, setBright] = useState(2);
@@ -363,9 +408,48 @@ function MacModel() {
     if (disk.current) gsap.to(disk.current.position, { z: ejected.current ? 1.75 : 1.1, duration: 0.5, ease: 'back.out(1.6)' });
   };
 
+  const goTo = (selector: string) => document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth' });
+
+  /** Tiny command line: type a word on the keyboard, press ENTER. */
+  const runCommand = (raw: string): string => {
+    const cmd = raw.trim().toLowerCase();
+    switch (cmd) {
+      case '':
+        return '';
+      case 'help':
+        return 'try: projects skills experience contact cat clear';
+      case 'projects':
+        goTo('#projects');
+        return 'opening projects...';
+      case 'skills':
+        goTo('#industries');
+        return 'opening skills...';
+      case 'experience':
+        goTo('#experience');
+        return 'opening experience...';
+      case 'contact':
+        goTo('#footer');
+        return 'opening contact...';
+      case 'cat':
+        return 'mrrp! =^..^=';
+      case 'clear':
+        return '';
+      default:
+        return `${cmd}: command not found (try help)`;
+    }
+  };
+
   const type = (c: string) => {
-    if (!ui.current.on) return;
-    ui.current.typed = (ui.current.typed + c).slice(-26);
+    const state = ui.current;
+    if (!state.on) return;
+    if (c === '\n') {
+      state.output = runCommand(state.typed);
+      state.typed = '';
+    } else if (c === '\b') {
+      state.typed = state.typed.slice(0, -1);
+    } else {
+      state.typed = (state.typed + c).slice(-26);
+    }
   };
 
   const level = BRIGHTNESS[bright];
@@ -449,16 +533,19 @@ function MacModel() {
       </mesh>
 
       {/* keyboard (floor is y = -1.35) */}
-      <group position={[0, -1.28, 2.75]}>
-        <RoundedBox args={[3.1, 0.14, 1.15]} radius={0.02}>
+      <group position={[-0.25, -1.28, 2.75]}>
+        {/* base is larger than the key field on every side */}
+        <RoundedBox args={[3.5, 0.14, 1.5]} radius={0.02} position={[0.25, 0, 0.1]}>
           <meshStandardMaterial color={beige} roughness={0.7} />
         </RoundedBox>
         {KEY_ROWS.map((row, r) =>
           [...row].map((ch, i) => (
-            <Key key={ch} char={ch} x={(i - 4.5) * 0.28 + r * 0.06} z={-0.32 + r * 0.26} onPress={type} />
+            <Key key={ch} char={ch} x={(i - 4.5) * KEY_PITCH + r * 0.05} z={-0.32 + r * 0.26} onPress={type} />
           ))
         )}
-        <Key char=" " x={0} z={0.5} width={1.6} onPress={type} />
+        <Key char={'\b'} label="DEL" x={1.52} z={-0.32} width={0.4} onPress={type} />
+        <Key char={'\n'} label="ENTER" x={1.6} z={-0.06} width={0.45} onPress={type} />
+        <Key char=" " label=" " x={0.1} z={0.5} width={1.6} onPress={type} />
       </group>
 
       {/* mouse */}
@@ -513,7 +600,7 @@ const hasWebGL = () => {
   }
 };
 
-/** Draggable 3D Macintosh: rotates up to ±25° per axis, snaps to 12.5° poses on release. */
+/** Draggable 3D Macintosh: turns ±25° sideways and ±8° up/down, snapping to small poses on release. */
 export default function Mac3D({ className = '' }: { className?: string }) {
   const rot = useRef<Rotation>({ x: 0, y: 0 });
   const dragging = useRef(false);
@@ -546,16 +633,16 @@ export default function Mac3D({ className = '' }: { className?: string }) {
       const dx = ev.clientX - last.current.x;
       const dy = ev.clientY - last.current.y;
       last.current = { x: ev.clientX, y: ev.clientY };
-      rot.current.y = clamp(rot.current.y + dx * 0.01, LIMIT);
+      rot.current.y = clamp(rot.current.y + dx * 0.01, LIMIT_Y);
       // Touch keeps vertical gestures for page scroll, so only mouse/pen tilts on X.
-      if (ev.pointerType !== 'touch') rot.current.x = clamp(rot.current.x + dy * 0.01, LIMIT);
+      if (ev.pointerType !== 'touch') rot.current.x = clamp(rot.current.x + dy * 0.01, LIMIT_X);
     };
     const up = () => {
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', up);
       window.removeEventListener('pointercancel', up);
       dragging.current = false;
-      settle(snap(rot.current.x), snap(rot.current.y), 0.6);
+      settle(snap(rot.current.x, SNAP_STEP_X, LIMIT_X), snap(rot.current.y, SNAP_STEP_Y, LIMIT_Y), 0.6);
       idleTimer.current = window.setTimeout(() => settle(0, 0, 0.9), IDLE_RETURN_MS);
     };
     window.addEventListener('pointermove', move);

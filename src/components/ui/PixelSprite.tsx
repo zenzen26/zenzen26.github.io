@@ -4,6 +4,7 @@ const FILL: Record<string, string> = {
   p: 'fill-grey',
   w: 'fill-white',
   o: 'fill-calico',
+  y: 'fill-tabby',
   k: 'fill-blush',
 };
 

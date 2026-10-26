@@ -44,8 +44,9 @@
   --color-moss: #2f6f46;
   --color-phosphor: #55f28b;
   --color-ink: #0b0b0b;
-  /* Calico pet */
+  /* Ginger tabby pet */
   --color-calico: #e8903a;
+  --color-tabby: #f6c885;
   --color-blush: #f2a0b0;
   --color-black: #000000;
   --color-white: #ffffff;
@@ -135,12 +136,6 @@ body, .b1, .b2, .b3, p, span, div, a, button, input, textarea, select, label {
     rgb(0 0 0 / 0.25) 3px
   );
   color: var(--color-phosphor);
-}
-
-/* Light outline around a pixel sprite so dark sprites (the black cat) read on the dark desktop */
-@utility pixel-outline {
-  filter: drop-shadow(2px 0 0 var(--color-beige-light)) drop-shadow(-2px 0 0 var(--color-beige-light))
-    drop-shadow(0 2px 0 var(--color-beige-light)) drop-shadow(0 -2px 0 var(--color-beige-light));
 }
 
 /* Classic Mac window title bar: horizontal pinstripes */
