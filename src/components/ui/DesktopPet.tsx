@@ -123,6 +123,26 @@ export default function DesktopPet() {
       .to(btn, { ...hop, y: -52 }).to(btn, { y: 0, duration: 0.26, ease: 'power2.in' });
   };
 
+  /** Rotation says where the cat is: > 45 = on the left wall, < -45 = on the right wall, else the floor. */
+  const wallSide = (wrap: HTMLDivElement): Wall | null => {
+    const rot = Number(gsap.getProperty(wrap, 'rotation'));
+    return rot > 45 ? 'left' : rot < -45 ? 'right' : null;
+  };
+
+  /** Head direction (in the cat's own frame) that points up a wall. */
+  const headUpFor = (side: Wall): 1 | -1 => (side === 'left' ? -1 : 1);
+
+  /** Crawl back down a wall and turn onto the floor. */
+  const descend = (wrap: HTMLDivElement, side: Wall, onDone: () => void) => {
+    const y = Number(gsap.getProperty(wrap, 'y'));
+    setMode('crawl');
+    setFacing(-headUpFor(side) as 1 | -1);
+    tween.current = gsap
+      .timeline({ onComplete: onDone })
+      .to(wrap, { y: 0, duration: Math.max(0.1, Math.abs(y) / CRAWL_SPEED), ease: 'none' })
+      .to(wrap, { rotation: 0, duration: 0.35, ease: 'power2.out' });
+  };
+
   /** Walk to the screen edge, turn onto the wall, crawl up, look around, crawl back down. */
   const climb = (wrap: HTMLDivElement, side: Wall) => {
     const from = Number(gsap.getProperty(wrap, 'x'));
@@ -152,6 +172,11 @@ export default function DesktopPet() {
   wanderRef.current = () => {
     const wrap = wrapRef.current;
     if (!wrap) return;
+    const side = wallSide(wrap);
+    if (side) {
+      descend(wrap, side, () => settle());
+      return;
+    }
     if (Math.random() < 0.3) {
       climb(wrap, Math.random() < 0.5 ? 'left' : 'right');
       return;
@@ -226,6 +251,22 @@ export default function DesktopPet() {
       gsap.fromTo(hopRef.current, { x: -4 }, { x: 4, yoyo: true, repeat: 15, duration: 0.05, ease: 'none', clearProps: 'transform' });
     }
     timer.current = window.setTimeout(() => {
+      const side = wallSide(wrap);
+      if (side) {
+        // on a wall: storm off along it, up or down to the far end
+        const y = Number(gsap.getProperty(wrap, 'y'));
+        const maxUp = Math.max(120, window.innerHeight - SIZE - MENU_BAR);
+        const end = y > -maxUp / 2 ? -maxUp : 0;
+        setFacing(end < y ? headUpFor(side) : (-headUpFor(side) as 1 | -1));
+        setMode('crawl');
+        tween.current = gsap.to(wrap, {
+          y: end,
+          duration: Math.abs(end - y) / RUN_AWAY_SPEED,
+          ease: 'none',
+          onComplete: sulk,
+        });
+        return;
+      }
       const from = Number(gsap.getProperty(wrap, 'x'));
       const to = from > window.innerWidth / 2 ? 16 : window.innerWidth - SIZE - 16;
       setFacing(to > from ? 1 : -1);
