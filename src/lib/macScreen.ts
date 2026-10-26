@@ -158,7 +158,7 @@ function drawHome(ctx: CanvasRenderingContext2D, s: ScreenState, cursorOn: boole
   ctx.fillText('ZEN', 40 + ctx.measureText('ZEN').width, 240);
 
   ctx.font = '42px "VT323", monospace';
-  ctx.fillText('Web Developer & Server Engineer', 40, 296);
+  ctx.fillText('Web Developer & Bio Enthusiast', 40, 296);
   ctx.fillStyle = light;
   ctx.font = '32px "VT323", monospace';
   ctx.fillText('Full-stack web, servers and AI automation.', 40, 346);
