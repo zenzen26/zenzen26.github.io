@@ -8,7 +8,7 @@ import StickyExperience from '@/components/StickyExperience';
 import FooterResume from '@/components/FooterResume';
 import StickyAnchor from '@/components/StickyAnchor';
 import HeroHelp from '@/components/HeroHelp';
-import HelpDrawer from '@/components/HelpDrawer';
+import HelpButton from '@/components/HelpButton';
 import HeroIntro from '@/components/HeroIntro';
 import { resetView } from '@/lib/viewReset';
 import Container from '@/components/ui/Container';
@@ -67,28 +67,26 @@ export default function Home() {
           </Suspense>
         </div>
 
-        <HelpDrawer />
+        <div className="absolute right-4 top-16 z-20 flex items-center gap-2">
+          <HelpButton className="xl:hidden" />
+          <button
+            type="button"
+            onClick={resetView}
+            className="bevel-out flex items-center gap-2 bg-beige text-ink px-3 py-1 b2 cursor-pointer hover:bg-ink hover:text-beige-light"
+          >
+            <RotateCcw size={16} /> Reset view
+          </button>
+        </div>
 
-        <button
-          type="button"
-          onClick={resetView}
-          className="bevel-out absolute right-4 top-16 z-20 flex items-center gap-2 bg-beige text-ink px-3 py-1 b2 cursor-pointer hover:bg-ink hover:text-beige-light"
-        >
-          <RotateCcw size={16} /> Reset view
-        </button>
-
-        {/* Wide screens: cheat-sheet left, About right; smaller screens stack them under the Mac */}
+        {/* Wide screens: commands left, About right; smaller screens: About under the Mac, commands behind a button */}
         <div className="hidden xl:block absolute left-8 top-1/2 -translate-y-1/2 z-10 w-72">
           <HeroHelp />
         </div>
         <div className="hidden xl:block absolute right-8 top-1/2 -translate-y-1/2 z-10 w-96 2xl:w-[28rem]">
           <HeroIntro />
         </div>
-        <Container className="xl:hidden mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+        <Container className="xl:hidden mt-6 md:max-w-2xl">
           <HeroIntro />
-          <div className="hidden md:block">
-            <HeroHelp />
-          </div>
         </Container>
       </section>
 

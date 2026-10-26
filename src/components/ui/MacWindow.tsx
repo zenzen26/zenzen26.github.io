@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { X } from 'lucide-react';
 import { gsap } from 'gsap';
 import { Draggable } from 'gsap/Draggable';
 import { RESET_VIEW_EVENT } from '@/lib/viewReset';
@@ -74,20 +75,22 @@ export default function MacWindow({
       className={`bevel-out bg-beige-light text-ink flex flex-col min-w-0 ${className}`}
     >
       <div ref={barRef} className={`flex items-center gap-2 border-b-2 border-ink ${barClassName} px-2 py-1 ${draggable ? 'xl:cursor-grab xl:active:cursor-grabbing select-none' : ''}`}>
+        <span className="size-7 shrink-0" />
+        <span className="titlebar-stripes h-4 flex-1" />
+        <span className="font-pixel b2 px-2 bg-inherit truncate max-w-[70%]">{title}</span>
+        <span className="titlebar-stripes h-4 flex-1" />
         {onClose ? (
           <button
             type="button"
             aria-label="Close window"
             onClick={onClose}
-            className="size-5 shrink-0 border-2 border-ink bg-beige-light hover:bg-ink cursor-pointer"
-          />
+            className="flex size-7 shrink-0 items-center justify-center border-2 border-ink bg-beige-light text-ink hover:bg-ink hover:text-beige-light cursor-pointer"
+          >
+            <X size={18} strokeWidth={2.5} />
+          </button>
         ) : (
-          <span className="size-5 shrink-0" />
+          <span className="size-7 shrink-0" />
         )}
-        <span className="titlebar-stripes h-4 flex-1" />
-        <span className="font-pixel b2 px-2 bg-inherit truncate max-w-[70%]">{title}</span>
-        <span className="titlebar-stripes h-4 flex-1" />
-        <span className="size-5 shrink-0" />
       </div>
       <div className={`min-h-0 flex-1 ${bodyClassName}`}>{children}</div>
     </div>

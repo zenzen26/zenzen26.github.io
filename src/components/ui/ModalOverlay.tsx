@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { gsap } from 'gsap';
 import MacWindow from '@/components/ui/MacWindow';
 
@@ -10,7 +11,11 @@ interface ModalOverlayProps {
   widthClassName?: string;
 }
 
-/** Full-screen dimmer + a Mac window that zooms open. Used by project and experience details. */
+/**
+ * Full-screen dimmer + a Mac window that zooms open. Used by project and experience details,
+ * the photo and the commands list. Rendered into <body>: a draggable or animated parent window has a
+ * CSS transform, which would otherwise trap a position:fixed popup inside that window.
+ */
 export default function ModalOverlay({ title, onClose, children, widthClassName = 'max-w-5xl' }: ModalOverlayProps) {
   const winRef = useRef<HTMLDivElement>(null);
 
@@ -26,7 +31,7 @@ export default function ModalOverlay({ title, onClose, children, widthClassName 
     return () => { tween.kill(); };
   }, []);
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-forest/80 cursor-pointer"
       onClick={onClose}
@@ -36,6 +41,7 @@ export default function ModalOverlay({ title, onClose, children, widthClassName 
           {children}
         </MacWindow>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
