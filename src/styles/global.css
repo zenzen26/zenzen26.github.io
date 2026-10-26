@@ -175,7 +175,7 @@ body, .b1, .b2, .b3, p, span, div, a, button, input, textarea, select, label {
 /* ------------------------------------------------------------
    Mickey-glove pixel cursors (public/cursors): arrow, hand, pressed,
    disabled, grab. Unlayered on purpose so they win over Tailwind's
-   cursor-* utilities. Hotspots: arrow/disabled 0,0; hand 10,0; pressed 10,2.
+   cursor-* utilities. Hotspots: arrow/disabled 0,0; hand 10,0; pressed 10,4.
    ------------------------------------------------------------ */
 html {
   cursor: url('/cursors/arrow.svg') 0 0, auto;
@@ -198,7 +198,7 @@ summary:active,
 [role='button']:active,
 .cursor-pointer:active,
 .cursor-zoom-in:active {
-  cursor: url('/cursors/pressed.svg') 10 2, pointer;
+  cursor: url('/cursors/pressed.svg') 10 4, pointer;
 }
 
 /* picked up / dragging */
