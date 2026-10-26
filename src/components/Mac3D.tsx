@@ -521,7 +521,7 @@ function MacModel({ data }: { data: TermData }) {
   );
 }
 
-function Rig({ rot, dragging, data }: { rot: MutableRefObject<Rotation>; dragging: MutableRefObject<boolean>; data: TermData }) {
+function Rig({ rot, data }: { rot: MutableRefObject<Rotation>; data: TermData }) {
   const group = useRef<Group>(null);
   const aspect = useThree((s) => s.size.width / s.size.height);
   const width = useThree((s) => s.size.width);
@@ -539,10 +539,9 @@ function Rig({ rot, dragging, data }: { rot: MutableRefObject<Rotation>; draggin
     camera.position.set(0, 0.4, z);
     camera.lookAt(0, -0.1, 0);
   }, [camera, aspect, width]);
-  useFrame(({ clock }) => {
+  useFrame(() => {
     if (!group.current) return;
     group.current.rotation.set(rot.current.x, rot.current.y, 0);
-    group.current.position.y = dragging.current ? 0 : Math.sin(clock.elapsedTime * 1.4) * 0.04;
   });
   return (
     <group ref={group}>
@@ -563,7 +562,6 @@ const hasWebGL = () => {
 export default function Mac3D({ className = '', projects, experiences }: { className?: string } & TermData) {
   const data = useMemo(() => ({ projects, experiences }), [projects, experiences]);
   const rot = useRef<Rotation>({ x: 0, y: 0 });
-  const dragging = useRef(false);
   const last = useRef({ x: 0, y: 0 });
   const idleTimer = useRef<number | undefined>(undefined);
   const [webgl] = useState(hasWebGL);
@@ -585,7 +583,6 @@ export default function Mac3D({ className = '', projects, experiences }: { class
 
   // Window-level listeners so r3f still receives its own click events on the canvas.
   const onDown = (e: ReactPointerEvent<HTMLDivElement>) => {
-    dragging.current = true;
     setGrabbing(true);
     last.current = { x: e.clientX, y: e.clientY };
     window.clearTimeout(idleTimer.current);
@@ -603,7 +600,6 @@ export default function Mac3D({ className = '', projects, experiences }: { class
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', up);
       window.removeEventListener('pointercancel', up);
-      dragging.current = false;
       setGrabbing(false);
       settle(snap(rot.current.x, SNAP_STEP_X, LIMIT_X), snap(rot.current.y, SNAP_STEP_Y, LIMIT_Y), 0.6);
       idleTimer.current = window.setTimeout(() => settle(0, 0, 0.9), IDLE_RETURN_MS);
@@ -632,7 +628,7 @@ export default function Mac3D({ className = '', projects, experiences }: { class
         <ambientLight intensity={0.75} />
         <directionalLight position={[4, 6, 5]} intensity={1.5} />
         <directionalLight position={[-5, 2, -3]} intensity={0.6} />
-        <Rig rot={rot} dragging={dragging} data={data} />
+        <Rig rot={rot} data={data} />
       </Canvas>
       {/* hidden field: focusing it raises the on-screen keyboard on phones; keys are read from window keydown */}
       <input
