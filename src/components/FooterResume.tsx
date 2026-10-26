@@ -1,6 +1,7 @@
 import { Mail, Phone, MapPin, Github, Linkedin, LayoutDashboard } from 'lucide-react';
 import FloppyIcon from '@/components/ui/FloppyIcon';
 import MacWindow from '@/components/ui/MacWindow';
+import { JOY_EVENT } from '@/lib/catEvent';
 
 const resumes = [
   { name: 'All', tone: 'ink', focus: 'All in One', file: '/resumes/Resume All - Zi En Tham.pdf' },
@@ -14,11 +15,13 @@ const socials = [
   { icon: LayoutDashboard, label: 'Tableau', href: 'https://public.tableau.com/app/profile/zenzen26/vizzes' },
 ];
 
-const resumesUpdated = new Date(__RESUME_UPDATED__).toLocaleDateString('en-AU', {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-});
+/** "updated 4 Aug 2026" for one resume file, from its own git/file date. */
+const updatedOn = (file: string) => {
+  const iso = __RESUME_UPDATED__[file.split('/').pop() ?? ''];
+  return iso
+    ? `updated ${new Date(iso).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}`
+    : undefined;
+};
 
 export default function FooterResume() {
   const handleDownload = (file: string, name: string) => {
@@ -28,6 +31,7 @@ export default function FooterResume() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    window.dispatchEvent(new Event(JOY_EVENT)); // the cat is happy someone wants a resume
   };
 
   return (
@@ -64,14 +68,14 @@ export default function FooterResume() {
           </div>
 
           <MacWindow title="Resume Hub" className="text-ink" bodyClassName="p-5 sm:p-6">
-            <p className="b3 text-ink/60">Click a disk to download.</p>
-            <p className="text-xs text-ink/50 mb-4">last updated {resumesUpdated}</p>
+            <p className="b3 text-ink/60 mb-4">Click a disk to download.</p>
             <div className="grid grid-cols-3 gap-3">
               {resumes.map((resume) => (
                 <FloppyIcon
                   key={resume.name}
                   label={resume.name}
                   caption={resume.focus}
+                  note={updatedOn(resume.file)}
                   tone={resume.tone}
                   onClick={() => handleDownload(resume.file, resume.name)}
                 />

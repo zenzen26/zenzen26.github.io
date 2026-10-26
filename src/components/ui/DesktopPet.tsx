@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { gsap } from 'gsap';
-import { CAT_EVENT } from '@/lib/catEvent';
+import { CAT_EVENT, JOY_EVENT } from '@/lib/catEvent';
 
 const SPEED = 60; // px per second along the floor
 const CRAWL_SPEED = 45; // px per second up or down a screen edge
@@ -14,23 +14,70 @@ const ANGRY_CLICKS = 4; // this many clicks...
 const ANGRY_WINDOW = 2000; // ...within this many ms make it angry
 const RUN_AWAY_SPEED = 260; // px per second when it storms off
 const DIZZY_DISTANCE = 1500; // px of swinging around while held before it gets dizzy
+const SULK_MS = 9000; // how long it sulks in its corner after being angry
+const PURR_AFTER_MS = 900; // hover (or press and hold) this long and it starts to purr
+const RANDOM_JOY = 0.1; // chance of a happy hop after finishing a walk
 
-type Mode = 'sit' | 'walk' | 'crawl' | 'held' | 'fall' | 'hurt' | 'angry' | 'dizzy';
+type Mode = 'sit' | 'walk' | 'crawl' | 'held' | 'fall' | 'hurt' | 'angry' | 'dizzy' | 'sulk' | 'purr' | 'joy';
 type Wall = 'left' | 'right';
 
 const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /**
- * The header's calico cat as a desktop pet: waddles along the bottom facing the way it is
- * heading, sometimes crawls up the side of the screen, can be picked up and dropped
- * (soft landing from low, a "mew! >^<" from high, dizzy if swung around), meows when clicked,
- * and gets angry if spam-clicked.
+ * Dizzy cat: the icon redrawn at a very coarse resolution with sideways slice glitches
+ * and colour tearing, like a corrupted sprite.
+ */
+function GlitchCat() {
+  const ref = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = ref.current;
+    const ctx = canvas?.getContext('2d', { willReadFrequently: true });
+    if (!canvas || !ctx) return;
+    const N = canvas.width; // coarse on purpose: ~20 big pixels
+    const img = new Image();
+    img.src = '/favicon.png';
+    let id = 0;
+
+    const draw = () => {
+      ctx.clearRect(0, 0, N, N);
+      ctx.drawImage(img, 0, 0, N, N);
+      for (let i = 0; i < 4; i++) {
+        const y = Math.floor(Math.random() * N);
+        const h = 1 + Math.floor(Math.random() * 3);
+        const dx = Math.floor(Math.random() * 7) - 3;
+        const slice = ctx.getImageData(0, y, N, h);
+        ctx.clearRect(0, y, N, h);
+        ctx.putImageData(slice, dx, y);
+      }
+      canvas.style.filter = `hue-rotate(${Math.floor(Math.random() * 360)}deg) saturate(${1 + Math.random() * 2})`;
+    };
+
+    const start = () => {
+      draw();
+      if (!prefersReducedMotion()) id = window.setInterval(draw, 90);
+    };
+    if (img.complete) start();
+    else img.onload = start;
+    return () => window.clearInterval(id);
+  }, []);
+
+  return <canvas ref={ref} width={20} height={20} className="size-22 translate-y-3 [image-rendering:pixelated]" />;
+}
+
+/**
+ * The header's calico cat as a desktop pet. It waddles along the bottom facing the way it is
+ * heading, sometimes crawls up the side of the screen, and can be picked up and dropped
+ * (soft landing from low, "mew! >^<" from high, a glitchy dizzy spell if swung around).
+ * Moods: meows when clicked, purrs when you hover or hold, hops for joy (resume downloads,
+ * login, now and then), gets angry if spam-clicked and then sulks in a corner.
  */
 export default function DesktopPet() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const hopRef = useRef<HTMLButtonElement>(null);
   const tween = useRef<gsap.core.Animation | undefined>(undefined);
   const timer = useRef<number | undefined>(undefined);
+  const holdTimer = useRef<number | undefined>(undefined);
   const wanderRef = useRef<() => void>(() => {});
   const grab = useRef({ x: 0, y: 0, moved: false });
   const clicks = useRef<number[]>([]);
@@ -42,14 +89,38 @@ export default function DesktopPet() {
 
   const say = (text: string, ms = 1300) => {
     setBubble(text);
-    window.setTimeout(() => setBubble(null), ms);
+    window.setTimeout(() => setBubble((b) => (b === text ? null : b)), ms);
   };
 
-  const settle = () => {
+  /** Back to sitting; after a while it wanders off again. `canCelebrate` lets it do a happy hop first. */
+  const settle = (canCelebrate = false) => {
+    if (canCelebrate && !prefersReducedMotion() && Math.random() < RANDOM_JOY) {
+      joy();
+      return;
+    }
     setMode('sit');
     if (!prefersReducedMotion()) {
       timer.current = window.setTimeout(() => wanderRef.current(), gsap.utils.random(2500, 6000));
     }
+  };
+
+  /** Three happy hops. */
+  const joy = () => {
+    const btn = hopRef.current;
+    window.clearTimeout(timer.current);
+    tween.current?.kill();
+    setMode('joy');
+    say('yay! \\(^o^)/', 2000);
+    if (!btn || prefersReducedMotion()) {
+      timer.current = window.setTimeout(() => settle(), 1200);
+      return;
+    }
+    const hop = { y: -38, duration: 0.2, ease: 'power2.out' };
+    tween.current = gsap
+      .timeline({ onComplete: () => { gsap.set(btn, { clearProps: 'transform' }); settle(); } })
+      .to(btn, hop).to(btn, { y: 0, duration: 0.2, ease: 'power2.in' })
+      .to(btn, hop).to(btn, { y: 0, duration: 0.2, ease: 'power2.in' })
+      .to(btn, { ...hop, y: -52 }).to(btn, { y: 0, duration: 0.26, ease: 'power2.in' });
   };
 
   /** Walk to the screen edge, turn onto the wall, crawl up, look around, crawl back down. */
@@ -65,7 +136,7 @@ export default function DesktopPet() {
     setFacing(wall > from ? 1 : -1);
     setMode('walk');
     tween.current = gsap
-      .timeline({ onComplete: settle })
+      .timeline({ onComplete: () => settle() })
       .to(wrap, { x: wall, duration: Math.abs(wall - from) / SPEED, ease: 'none' })
       .add(() => { setMode('crawl'); setFacing(headUp); })
       .to(wrap, { rotation: side === 'left' ? 90 : -90, duration: 0.35, ease: 'power2.out' })
@@ -89,7 +160,7 @@ export default function DesktopPet() {
     const to = gsap.utils.random(16, Math.max(32, window.innerWidth - SIZE - 16), 1);
     setFacing(to > from ? 1 : -1);
     setMode('walk');
-    tween.current = gsap.to(wrap, { x: to, duration: Math.abs(to - from) / SPEED, ease: 'none', onComplete: settle });
+    tween.current = gsap.to(wrap, { x: to, duration: Math.abs(to - from) / SPEED, ease: 'none', onComplete: () => settle(true) });
   };
 
   useEffect(() => {
@@ -99,6 +170,7 @@ export default function DesktopPet() {
     if (!prefersReducedMotion()) timer.current = window.setTimeout(() => wanderRef.current(), 1800);
     return () => {
       window.clearTimeout(timer.current);
+      window.clearTimeout(holdTimer.current);
       tween.current?.kill();
     };
   }, []);
@@ -117,15 +189,33 @@ export default function DesktopPet() {
     }
   };
 
-  // The Mac's `cat` command makes the pet say hi too.
+  // The Mac's `cat` command says hi; resume downloads and `login` make it jump for joy.
   useEffect(() => {
     const hi = () => meow();
+    const cheer = () => joy();
     window.addEventListener(CAT_EVENT, hi);
-    return () => window.removeEventListener(CAT_EVENT, hi);
+    window.addEventListener(JOY_EVENT, cheer);
+    return () => {
+      window.removeEventListener(CAT_EVENT, hi);
+      window.removeEventListener(JOY_EVENT, cheer);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /** Too many clicks: shake, hiss, then storm off to the far side of the screen. */
+  /** Hover or hold still on the cat: it settles down and purrs until you stop. */
+  const startPurr = () => {
+    window.clearTimeout(timer.current);
+    tween.current?.kill();
+    setMode('purr');
+    setBubble('purrr~ ♥');
+  };
+
+  const stopPurr = () => {
+    setBubble(null);
+    settle();
+  };
+
+  /** Too many clicks: shake, hiss, storm off to a corner and sulk there. */
   const getAngry = () => {
     const wrap = wrapRef.current;
     if (!wrap) return;
@@ -140,25 +230,51 @@ export default function DesktopPet() {
       const to = from > window.innerWidth / 2 ? 16 : window.innerWidth - SIZE - 16;
       setFacing(to > from ? 1 : -1);
       setMode('walk');
-      tween.current = gsap.to(wrap, { x: to, duration: Math.abs(to - from) / RUN_AWAY_SPEED, ease: 'none', onComplete: settle });
+      tween.current = gsap.to(wrap, {
+        x: to,
+        duration: Math.abs(to - from) / RUN_AWAY_SPEED,
+        ease: 'none',
+        onComplete: sulk,
+      });
     }, 2300);
+  };
+
+  /** Faces the corner it ran to, goes grey and silent, and ignores you for a while. */
+  const sulk = () => {
+    setMode('sulk');
+    setBubble('. . .');
+    timer.current = window.setTimeout(() => {
+      setBubble(null);
+      settle();
+    }, SULK_MS);
   };
 
   const onPointerDown = (e: ReactPointerEvent<HTMLButtonElement>) => {
     if (mode === 'angry') return; // not in the mood to be touched
+    if (mode === 'sulk') {
+      say('hmph!', 1200);
+      return;
+    }
     window.clearTimeout(timer.current);
     tween.current?.kill();
     grab.current = { x: e.clientX, y: e.clientY, moved: false };
     swing.current = { dist: 0, x: e.clientX, y: e.clientY, dizzy: false };
     e.currentTarget.setPointerCapture(e.pointerId);
+    // press and hold without moving: purr (this is how touch screens pet it)
+    window.clearTimeout(holdTimer.current);
+    holdTimer.current = window.setTimeout(() => {
+      if (!grab.current.moved) startPurr();
+    }, PURR_AFTER_MS);
   };
 
   const onPointerMove = (e: ReactPointerEvent<HTMLButtonElement>) => {
     const wrap = wrapRef.current;
-    if (!wrap || mode === 'angry' || !e.currentTarget.hasPointerCapture(e.pointerId)) return;
+    if (!wrap || mode === 'angry' || mode === 'sulk' || !e.currentTarget.hasPointerCapture(e.pointerId)) return;
     if (!grab.current.moved && Math.hypot(e.clientX - grab.current.x, e.clientY - grab.current.y) < DRAG_THRESHOLD) return;
+    window.clearTimeout(holdTimer.current);
     if (!grab.current.moved) gsap.to(wrap, { rotation: 0, duration: 0.2 }); // let go of the wall
     grab.current.moved = true;
+    setBubble((b) => (b === 'purrr~ ♥' ? null : b));
     setMode('held');
     const sw = swing.current;
     sw.dist += Math.hypot(e.clientX - sw.x, e.clientY - sw.y);
@@ -175,12 +291,12 @@ export default function DesktopPet() {
     });
   };
 
-  /** Swung around too much: stumble about for a few seconds, then recover. */
+  /** Swung around too much: glitch out for a few seconds, then recover. */
   const daze = () => {
     swing.current.dizzy = false;
     setMode('dizzy');
     say('@_@', 3000);
-    timer.current = window.setTimeout(settle, 3200);
+    timer.current = window.setTimeout(() => settle(), 3200);
   };
 
   const land = (hard: boolean) => {
@@ -190,7 +306,7 @@ export default function DesktopPet() {
       say('mew! >^<', 1500);
       setMode('hurt');
       if (btn) gsap.fromTo(btn, { scaleY: 0.55, transformOrigin: '50% 100%' }, { scaleY: 1, duration: 0.5, ease: 'bounce.out', clearProps: 'transform,transformOrigin' });
-      timer.current = window.setTimeout(swing.current.dizzy ? daze : settle, 1300);
+      timer.current = window.setTimeout(swing.current.dizzy ? daze : () => settle(), 1300);
     } else {
       // landed on its paws: a soft little squash
       if (btn) gsap.fromTo(btn, { scaleY: 0.9, transformOrigin: '50% 100%' }, { scaleY: 1, duration: 0.3, ease: 'power2.out', clearProps: 'transform,transformOrigin' });
@@ -201,9 +317,14 @@ export default function DesktopPet() {
 
   const onPointerUp = (e: ReactPointerEvent<HTMLButtonElement>) => {
     const wrap = wrapRef.current;
-    if (!wrap || mode === 'angry') return;
+    if (!wrap || mode === 'angry' || mode === 'sulk') return;
+    window.clearTimeout(holdTimer.current);
     if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
     if (!grab.current.moved) {
+      if (mode === 'purr') {
+        stopPurr(); // it was being stroked, not clicked
+        return;
+      }
       const now = performance.now();
       clicks.current = [...clicks.current.filter((t) => now - t < ANGRY_WINDOW), now];
       if (clicks.current.length >= ANGRY_CLICKS) {
@@ -233,6 +354,17 @@ export default function DesktopPet() {
     });
   };
 
+  const onPointerEnter = () => {
+    if (mode !== 'sit') return;
+    window.clearTimeout(holdTimer.current);
+    holdTimer.current = window.setTimeout(startPurr, PURR_AFTER_MS);
+  };
+
+  const onPointerLeave = () => {
+    window.clearTimeout(holdTimer.current);
+    if (mode === 'purr') stopPurr();
+  };
+
   // Tilt and hop live on an inner wrapper so GSAP (which owns the button transform) never fights them.
   const motion =
     mode === 'walk' || mode === 'crawl'
@@ -242,10 +374,14 @@ export default function DesktopPet() {
         : mode === 'dizzy'
           ? (step ? 'rotate-12' : '-rotate-12')
           : mode === 'hurt'
-          ? 'rotate-6'
-          : mode === 'angry'
-            ? '[filter:saturate(2.5)_hue-rotate(-30deg)_brightness(0.9)]'
-            : '';
+            ? 'rotate-6'
+            : mode === 'angry'
+              ? '[filter:saturate(2.5)_hue-rotate(-30deg)_brightness(0.9)]'
+              : mode === 'sulk'
+                ? '[filter:grayscale(0.7)_brightness(0.75)] translate-y-1'
+                : mode === 'purr'
+                  ? 'animate-purr'
+                  : '';
 
   return (
     <div ref={wrapRef} className="fixed left-0 z-[55] pointer-events-none" style={{ bottom: REST_BOTTOM }}>
@@ -254,6 +390,14 @@ export default function DesktopPet() {
           {bubble}
         </span>
       )}
+      {mode === 'purr' && (
+        <>
+          <span aria-hidden="true" className="animate-heart absolute left-1/4 top-0 text-white">♥</span>
+          <span aria-hidden="true" className="animate-heart absolute right-1/4 top-2 text-white [animation-delay:0.6s]">♥</span>
+        </>
+      )}
+      {/* soft floor shadow so the cat never disappears into whatever is behind it */}
+      <span aria-hidden="true" className="absolute bottom-0 left-1/2 h-2 w-16 -translate-x-1/2 rounded-full bg-black/40 blur-[2px]" />
       <button
         ref={hopRef}
         type="button"
@@ -262,18 +406,24 @@ export default function DesktopPet() {
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
-        className={`pointer-events-auto touch-none select-none block ${mode === 'held' ? 'cursor-grabbing' : 'cursor-grab'}`}
+        onPointerEnter={onPointerEnter}
+        onPointerLeave={onPointerLeave}
+        className={`relative pointer-events-auto touch-none select-none block ${mode === 'held' ? 'cursor-grabbing' : 'cursor-grab'}`}
       >
         <div className={`origin-bottom transition-transform duration-200 ${facing === -1 ? '-scale-x-100' : ''} ${motion}`}>
-          {/* the icon's art sits above a transparent margin; pull it down so the paws touch the floor */}
-          <img
-            src="/favicon.png"
-            alt=""
-            draggable={false}
-            width={SIZE}
-            height={SIZE}
-            className="translate-y-3 [image-rendering:pixelated]"
-          />
+          {mode === 'dizzy' ? (
+            <GlitchCat />
+          ) : (
+            // the icon's art sits above a transparent margin; pull it down so the paws touch the floor
+            <img
+              src="/favicon.png"
+              alt=""
+              draggable={false}
+              width={SIZE}
+              height={SIZE}
+              className="translate-y-3 [image-rendering:pixelated]"
+            />
+          )}
         </div>
       </button>
     </div>

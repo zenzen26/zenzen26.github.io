@@ -230,3 +230,21 @@ body[style*='cursor: grab'],
 body[style*='cursor:grab'] {
   cursor: url('/cursors/grab.svg') 16 10, grab !important;
 }
+
+/* Desktop pet: purring tremble and rising hearts */
+@keyframes purr {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 1px 0; }
+}
+.animate-purr {
+  animation: purr 0.09s steps(1) infinite;
+}
+
+@keyframes heart-rise {
+  0% { opacity: 0; translate: 0 0; }
+  20% { opacity: 1; }
+  100% { opacity: 0; translate: 0 -34px; }
+}
+.animate-heart {
+  animation: heart-rise 1.4s steps(7) infinite;
+}

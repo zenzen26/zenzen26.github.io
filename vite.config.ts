@@ -6,17 +6,20 @@ import path from 'path'
 import fs from 'node:fs'
 import { execSync } from 'node:child_process'
 
-/** When the resume PDFs last changed: latest git commit touching them, else newest file mtime. */
-function resumesUpdated(): string {
+/** Per resume PDF, when it last changed: its latest git commit, else the file's mtime. */
+function resumesUpdated(): Record<string, string> {
   const dir = path.resolve(__dirname, 'public/resumes')
-  try {
-    const out = execSync('git log -1 --format=%cI -- public/resumes', { cwd: __dirname, encoding: 'utf8' }).trim()
-    if (out) return out
-  } catch {
-    // not a git checkout: fall through to mtime
+  const dates: Record<string, string> = {}
+  for (const file of fs.readdirSync(dir)) {
+    let iso = ''
+    try {
+      iso = execSync(`git log -1 --format=%cI -- "public/resumes/${file}"`, { cwd: __dirname, encoding: 'utf8' }).trim()
+    } catch {
+      // not a git checkout: fall through to mtime
+    }
+    dates[file] = iso || new Date(fs.statSync(path.join(dir, file)).mtimeMs).toISOString()
   }
-  const newest = Math.max(...fs.readdirSync(dir).map((f) => fs.statSync(path.join(dir, f)).mtimeMs))
-  return new Date(newest).toISOString()
+  return dates
 }
 
 export default defineConfig({

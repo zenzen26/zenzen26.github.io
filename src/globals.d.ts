@@ -1,2 +1,2 @@
-/** Injected by vite.config.ts: ISO date the resume PDFs last changed. */
-declare const __RESUME_UPDATED__: string;
+/** Injected by vite.config.ts: resume PDF file name -> ISO date it last changed. */
+declare const __RESUME_UPDATED__: Record<string, string>;
