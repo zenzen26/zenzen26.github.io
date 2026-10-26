@@ -298,6 +298,14 @@ export function runTerminal(raw: string, cwd: Dir, data: TermData): TermResult {
       return done(['you are now guest']);
     case 'exit':
       return done([], [{ type: 'exit' }]);
+    case 'ssh':
+    case 'scp':
+    case 'telnet':
+      return done(['>:(  no hacking allowed!', 'this server is not yours to log into.']);
+    case 'nano':
+    case 'vi':
+    case 'vim':
+      return done(['>:(  hands off! no hacking allowed.', 'this machine is read-only.']);
     case 'sudo':
       return done([`${getUser()} is not in the sudoers file.`, 'This incident will be reported to the cat.']);
     case 'rm':
