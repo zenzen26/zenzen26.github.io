@@ -1,15 +1,19 @@
 import { useState } from 'react';
+import { ChevronRight, Menu } from 'lucide-react';
 import MacWindow from '@/components/ui/MacWindow';
 import { COMMAND_GROUPS, CommandRow } from '@/components/HeroHelp';
 
-/** Phones: the command list hides behind a side tab and slides out as a swipeable carousel. */
+/**
+ * Phones: the command list is a side panel parked just off the right edge. A round handle
+ * straddling its left edge peeks in as a half-circle; tap it to slide the panel out.
+ */
 export default function HelpDrawer() {
   const [open, setOpen] = useState(false);
 
   return (
     <div
-      className={`md:hidden absolute right-0 top-24 z-30 flex items-start transition-transform duration-300 ${
-        open ? 'translate-x-0' : 'translate-x-[calc(100%-2.5rem)]'
+      className={`md:hidden absolute right-0 top-24 z-30 transition-transform duration-300 ${
+        open ? 'translate-x-0' : 'translate-x-full'
       }`}
     >
       <button
@@ -17,9 +21,9 @@ export default function HelpDrawer() {
         aria-expanded={open}
         aria-label={open ? 'Hide commands' : 'Show commands'}
         onClick={() => setOpen((o) => !o)}
-        className="bevel-out w-10 shrink-0 bg-beige py-4 text-ink cursor-pointer font-pixel [writing-mode:vertical-rl]"
+        className="bevel-out absolute -left-6 -top-1 z-10 flex size-12 items-center justify-center rounded-full bg-beige text-ink cursor-pointer"
       >
-        {open ? 'CLOSE ›' : '‹ COMMANDS'}
+        {open ? <ChevronRight size={22} /> : <Menu size={22} />}
       </button>
 
       <MacWindow title="Commands.txt" className="w-[78vw] max-w-sm" bodyClassName="p-3">
