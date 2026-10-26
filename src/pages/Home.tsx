@@ -108,7 +108,7 @@ export default function Home() {
 
       <section className="py-16 sm:py-20 bg-moss/25">
         <Container>
-          <MacWindow title="README.txt" reveal className="mx-auto max-w-3xl" bodyClassName="p-6 sm:p-8">
+          <MacWindow title="README.md" reveal className="mx-auto max-w-3xl" bodyClassName="p-6 sm:p-8">
             <div className="flex flex-col sm:flex-row gap-6 sm:gap-8">
               <div className="flex shrink-0 flex-col items-center gap-2 sm:w-36">
                 <div className="bevel-in bg-forest size-28 flex items-center justify-center">
