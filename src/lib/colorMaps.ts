@@ -6,14 +6,6 @@ export const bgColorMap: Record<string, string> = {
   black: 'bg-ink text-white',
 };
 
-/** Maps a CSV color value to a floppy-disk case tone */
-export const floppyToneMap: Record<string, 'ink' | 'moss' | 'forest'> = {
-  green: 'moss',
-  amber: 'forest',
-  red: 'ink',
-  black: 'ink',
-};
-
 /** Maps a project type to its pill classes */
 export const typeColorMap: Record<string, string> = {
   AI: 'bg-phosphor text-ink',

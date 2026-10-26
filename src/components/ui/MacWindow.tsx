@@ -21,7 +21,7 @@ export default function MacWindow({
   return (
     <div
       data-win={reveal ? '' : undefined}
-      className={`bevel-out bg-beige-light flex flex-col min-w-0 ${className}`}
+      className={`bevel-out bg-beige-light text-ink flex flex-col min-w-0 ${className}`}
     >
       <div className="flex items-center gap-2 border-b-2 border-ink bg-beige px-2 py-1">
         {onClose ? (

@@ -52,67 +52,53 @@ export default function Home() {
     <div ref={pageRef} className="relative">
       <StickyAnchor />
 
-      {/* Hero — welcome window | draggable 3D Mac | status window */}
-      <section id="hero" className="min-h-screen pt-20 pb-10 flex items-center">
-        <Container className="w-full lg:pr-20">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
-            <div className="lg:col-span-4 order-2 lg:order-1">
-              <MacWindow title="Welcome.txt" reveal bodyClassName="p-6">
-                <h1 className="h1 mb-3">ZEN<span className="text-moss">ZEN</span></h1>
-                <p className="b1 text-moss mb-4">Web Developer &amp; Server Engineer</p>
-                <p className="b1 text-ink/80">
-                  Full-stack web development, server management, and AI workflow automation with n8n. I build and ship
-                  reliable systems end to end, combining technology, design, and creativity to deliver engaging digital experiences.
-                </p>
-              </MacWindow>
-            </div>
+      {/* Hero — the 3D Mac IS the hero; its screen carries the intro (see Mac3D) */}
+      <section id="hero" className="pt-12 pb-6">
+        <h1 className="sr-only">ZENZEN — Web Developer &amp; Server Engineer</h1>
+        <div className="h-[calc(100svh-4rem)] min-h-[520px]">
+          <Suspense fallback={<div className="size-full flex items-center justify-center"><PixelCat scale={10} className="animate-pixel-bob" /></div>}>
+            <Mac3D className="size-full" />
+          </Suspense>
+        </div>
 
-            <div className="lg:col-span-4 order-1 lg:order-2 h-[52vh] lg:h-[68vh]">
-              <Suspense fallback={<div className="size-full flex items-center justify-center"><PixelCat scale={10} className="animate-pixel-bob" /></div>}>
-                <Mac3D className="size-full" />
-              </Suspense>
+        {/* Phones: the on-screen text is tiny, so repeat the intro as a readable window */}
+        <Container className="md:hidden">
+          <MacWindow title="Welcome.txt" bodyClassName="p-5">
+            <div className="inline-flex items-center gap-2 bg-phosphor border-2 border-ink px-3 mb-4 b2">
+              <span className="size-3 bg-ink animate-pixel-bob" /> OPEN TO WORK
             </div>
-
-            <div className="lg:col-span-4 order-3">
-              <MacWindow title="Status" reveal bodyClassName="p-6">
-                <div className="inline-flex items-center gap-2 bg-phosphor border-2 border-ink px-3 mb-5 b2">
-                  <span className="size-3 bg-ink animate-pixel-bob" /> OPEN TO WORK
-                </div>
-                <div className="flex flex-col sm:flex-row gap-3 mb-6">
-                  <button onClick={() => scrollTo('#projects')} className="bevel-out px-6 py-2 bg-moss text-white b2 cursor-pointer hover:bg-ink">
-                    View Projects
-                  </button>
-                  <button onClick={() => scrollTo('#footer')} className="bevel-out px-6 py-2 bg-beige b2 cursor-pointer hover:bg-ink hover:text-white">
-                    Contact Me
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {heroTech.map((tech) => (
-                    <span key={tech} className="b3 px-2 bg-beige border-2 border-ink">{tech}</span>
-                  ))}
-                </div>
-              </MacWindow>
+            <p className="b1 text-moss mb-2">Web Developer &amp; Server Engineer</p>
+            <p className="b1 text-ink/80 mb-5">
+              Full-stack web development, server management, and AI workflow automation with n8n. I build and ship reliable systems end to end.
+            </p>
+            <div className="flex flex-col gap-3 mb-5">
+              <button onClick={() => scrollTo('#projects')} className="bevel-out px-6 py-2 bg-moss text-white b2 cursor-pointer hover:bg-ink">View Projects</button>
+              <button onClick={() => scrollTo('#footer')} className="bevel-out px-6 py-2 bg-beige b2 cursor-pointer hover:bg-ink hover:text-white">Contact Me</button>
             </div>
-          </div>
-        </Container>
-      </section>
-
-      <section id="projects" className="py-20 crt">
-        <Container>
-          <MacWindow title="Macintosh HD — Featured Projects" reveal className="text-ink" bodyClassName="p-6 sm:p-10">
-            <FeaturedProjects projects={featuredProjects} />
-            <div className="mt-10 text-center">
-              <Link to="/projects" className="bevel-out inline-block px-6 py-2 bg-beige b2 hover:bg-ink hover:text-white">
-                Open all projects →
-              </Link>
+            <div className="flex flex-wrap gap-2">
+              {heroTech.map((tech) => (
+                <span key={tech} className="b3 px-2 bg-beige border-2 border-ink">{tech}</span>
+              ))}
             </div>
           </MacWindow>
         </Container>
       </section>
 
+      <section id="projects" className="py-20 bg-forest-deep">
+        <Container>
+          <div className="mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+            <h2 className="h2 text-phosphor">Featured Projects</h2>
+            <Link to="/projects" className="bevel-out self-start bg-beige text-ink px-6 py-2 b2 hover:bg-ink hover:text-white">
+              Open all projects →
+            </Link>
+          </div>
+          <FeaturedProjects projects={featuredProjects} />
+        </Container>
+      </section>
+
       <IndustriesTech />
 
-      <section className="py-16 sm:py-20 bg-grey/30">
+      <section className="py-16 sm:py-20 bg-moss/25">
         <Container>
           <MacWindow title="ReadMe — Personal Details" reveal bodyClassName="p-6 sm:p-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

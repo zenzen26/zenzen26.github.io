@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { gsap } from 'gsap';
-import PixelCat from '@/components/ui/PixelCat';
 
 const navLinks = [
   { name: 'Home', href: '/' },
@@ -50,11 +49,11 @@ export default function Navigation() {
     );
 
   return (
-    <nav className="fixed top-0 inset-x-0 z-50 bg-beige-light border-b-2 border-ink shadow-[0_2px_0_var(--color-ink)]">
+    <nav className="fixed top-0 inset-x-0 z-50 bg-beige-light text-ink border-b-2 border-ink shadow-[0_2px_0_var(--color-ink)]">
       <div className="max-w-[1920px] mx-auto px-3 sm:px-6 lg:px-8 flex items-center justify-between h-12">
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center gap-2 pr-3">
-            <PixelCat scale={2} />
+            <img src="/favicon.png" alt="" className="size-9 object-contain" />
             <span className="font-pixel text-xl">ZENZEN</span>
           </Link>
           <div className="hidden lg:flex items-center">{navLinks.map((link) => renderLink(link))}</div>

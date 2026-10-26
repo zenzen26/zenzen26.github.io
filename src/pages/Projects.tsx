@@ -5,12 +5,11 @@ import { useWindowReveal } from '@/hooks/useWindowReveal';
 import type { Project } from '@/types';
 import FooterResume from '@/components/FooterResume';
 import Container from '@/components/ui/Container';
-import FloppyIcon from '@/components/ui/FloppyIcon';
+import ProjectTile from '@/components/ProjectTile';
 import MacWindow from '@/components/ui/MacWindow';
 import PageLoader from '@/components/ui/PageLoader';
 import TypeBadge from '@/components/ui/TypeBadge';
 import ProjectModal from '@/components/ProjectModal';
-import { floppyToneMap } from '@/lib/colorMaps';
 
 const btn = (active: boolean) =>
   `bevel-out px-3 py-1 b2 whitespace-nowrap cursor-pointer ${active ? 'bg-ink text-beige-light' : 'bg-beige hover:bg-ink hover:text-beige-light'}`;
@@ -88,18 +87,11 @@ export default function Projects() {
             </div>
 
             {/* Contents */}
-            <div className="p-6 sm:p-8 bg-white min-h-[50vh]">
+            <div className="p-6 sm:p-8 bg-beige min-h-[50vh]">
               {view === 'icons' ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-8 justify-items-center">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                   {filteredProjects.map((project) => (
-                    <FloppyIcon
-                      key={project.id}
-                      label={project.title}
-                      caption={`${project.type} · ${project.date}`}
-                      imageUrl={project.image_url}
-                      tone={floppyToneMap[project.color_tag] ?? 'ink'}
-                      onClick={() => setSelectedProject(project)}
-                    />
+                    <ProjectTile key={project.id} project={project} onClick={() => setSelectedProject(project)} />
                   ))}
                 </div>
               ) : (

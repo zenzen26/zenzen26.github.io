@@ -40,6 +40,7 @@
   --color-beige-light: #ece9dd;
   --color-grey: #9e9b8e;
   --color-forest: #10281b;
+  --color-forest-deep: #0a1a11;
   --color-moss: #2f6f46;
   --color-phosphor: #55f28b;
   --color-ink: #0b0b0b;
@@ -55,16 +56,17 @@ html, body {
   overflow-x: hidden;
 }
 
-* { box-sizing: border-box; }
-img, canvas, video { max-width: 100%; height: auto; display: block; }
-img { image-rendering: pixelated; }
+@layer base {
+  * { box-sizing: border-box; }
+  img, canvas, video { max-width: 100%; height: auto; display: block; }
+}
 
-/* Desktop: beige case colour with a 1-bit dither dot pattern */
+/* Dark desktop: forest green with a faint phosphor dither dot pattern */
 body {
-  background-color: var(--color-beige);
-  background-image: radial-gradient(rgb(0 0 0 / 0.14) 1px, transparent 1px);
+  background-color: var(--color-forest);
+  background-image: radial-gradient(rgb(85 242 139 / 0.08) 1px, transparent 1px);
   background-size: 4px 4px;
-  color: var(--color-ink);
+  color: var(--color-beige-light);
   font-family: "VT323", monospace;
   font-size: 22px;
   line-height: 1.3;

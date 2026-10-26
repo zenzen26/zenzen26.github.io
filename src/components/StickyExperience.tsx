@@ -57,11 +57,11 @@ export default function StickyExperience({ experiences, showEndCard = true }: St
 
   return (
     <>
-      <section id="experience" ref={sectionRef} className="bg-moss/25 md:overflow-hidden">
+      <section id="experience" ref={sectionRef} className="bg-forest-deep md:overflow-hidden">
         <div className="flex flex-col justify-center py-20 md:h-screen">
           <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 4xl:px-24 w-full mb-8">
             <h2 className="h2 mb-3">Work Experience</h2>
-            <p className="b1 text-ink/70 max-w-3xl">
+            <p className="b1 text-beige-light/80 max-w-3xl">
               <span className="md:hidden">Swipe to explore my journey. Tap any window for details.</span>
               <span className="hidden md:inline">Keep scrolling to travel through my career. Click any window to open it.</span>
             </p>

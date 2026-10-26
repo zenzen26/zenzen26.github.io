@@ -41,8 +41,9 @@ component, file, or helper unless you have to.
 - **Typography**: pixel headings `h1–h4` (Pixelify Sans) and terminal body
   `b1–b3` (VT323), see `global.css`. Don't add inline font-size utilities.
 - **Reusable bases** (extend these, don't fork): `MacWindow` (every panel and
-  modal), `FloppyIcon` (projects, resume downloads), `PixelCat` (+ `lib/pixelCat.ts`
-  sprite data), `ModalOverlay`, `TechStack`, `TypeBadge`; utilities `bevel-out`,
+  modal), `FloppyIcon` (resume downloads), `ProjectTile` (project thumbnails: Home +
+  Finder), `PixelSprite` → `PixelCat` / desktop pet (`lib/pixelCat.ts`, `lib/petCat.ts`
+  sprite data), `StaticTransition` (route change), `DesktopPet`, `ModalOverlay`, `TechStack`, `TypeBadge`; utilities `bevel-out`,
   `bevel-in`, `crt`, `titlebar-stripes`; hook `useWindowReveal` (scroll
   entrance/exit for any `MacWindow reveal`).
 - **Path alias**: import with `@/…`.
