@@ -77,7 +77,7 @@ export default function MacWindow({
       <div ref={barRef} className={`flex items-center gap-2 border-b-2 border-ink ${barClassName} px-2 py-1 ${draggable ? 'xl:cursor-grab xl:active:cursor-grabbing select-none' : ''}`}>
         <span className="size-7 shrink-0" />
         <span className="titlebar-stripes h-4 flex-1" />
-        <span className="font-pixel b2 px-2 bg-inherit truncate max-w-[70%]">{title}</span>
+        <span className="font-pixel b2 px-2 bg-inherit truncate max-w-[90%]">{title}</span>
         <span className="titlebar-stripes h-4 flex-1" />
         {onClose ? (
           <button

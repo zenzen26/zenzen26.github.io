@@ -58,7 +58,7 @@ export default function Home() {
         </div>
 
         {/* Wide screens: commands left, About right; smaller screens: About under the Mac, commands behind a button */}
-        <div className="hidden xl:block absolute left-8 top-1/2 -translate-y-1/2 z-10 w-72">
+        <div className="hidden xl:block absolute left-8 top-1/2 -translate-y-1/2 z-10 w-80">
           <HeroHelp />
         </div>
         <div className="hidden xl:block absolute right-8 top-1/2 -translate-y-1/2 z-10 w-96 2xl:w-[28rem]">
