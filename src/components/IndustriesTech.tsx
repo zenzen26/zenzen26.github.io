@@ -44,9 +44,11 @@ export default function IndustriesTechStack({ className = '' }: { className?: st
                 onFocus={() => setStatus(tagline)}
                 onMouseLeave={() => setStatus('Hover an icon')}
                 onBlur={() => setStatus('Hover an icon')}
-                className="group w-28 flex flex-col items-center gap-2 p-3 cursor-pointer hover:bg-ink hover:text-beige-light outline-none focus-visible:bg-ink focus-visible:text-beige-light"
+                className="group w-28 flex flex-col items-center gap-3 p-2 cursor-pointer outline-none"
               >
-                <Icon size={36} strokeWidth={1.5} />
+                <span className="bevel-out rounded-full size-20 bg-beige flex items-center justify-center transition-colors group-hover:bg-ink group-hover:text-beige-light group-focus-visible:bg-ink group-focus-visible:text-beige-light">
+                  <Icon size={34} strokeWidth={1.5} />
+                </span>
                 <span className="b2">{name}</span>
               </button>
             ))}
@@ -65,6 +67,7 @@ export default function IndustriesTechStack({ className = '' }: { className?: st
                   category === c ? 'bg-ink text-beige-light' : 'hover:bg-ink/10'
                 }`}
               >
+                <span className={`mr-2 inline-block size-3 rounded-full border-2 border-current align-middle ${category === c ? 'bg-phosphor' : ''}`} />
                 {c}
               </button>
             ))}
@@ -73,7 +76,7 @@ export default function IndustriesTechStack({ className = '' }: { className?: st
             <h3 className="h4 mb-4 text-moss">{category}</h3>
             <div className="flex flex-wrap gap-2">
               {skills[category].map((skill) => (
-                <span key={skill} className="b2 px-3 py-1 bg-beige border-2 border-ink">{skill}</span>
+                <span key={skill} className="b2 px-4 py-1 bg-beige border-2 border-ink rounded-full">{skill}</span>
               ))}
             </div>
           </div>

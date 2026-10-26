@@ -87,7 +87,7 @@ export default function Projects() {
             </div>
 
             {/* Contents */}
-            <div className="p-6 sm:p-8 bg-beige min-h-[50vh]">
+            <div className="p-6 sm:p-8 bg-forest-deep text-beige-light min-h-[50vh]">
               {view === 'icons' ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                   {filteredProjects.map((project) => (
@@ -95,12 +95,12 @@ export default function Projects() {
                   ))}
                 </div>
               ) : (
-                <ul className="divide-y-2 divide-ink/10">
+                <ul className="divide-y-2 divide-beige-light/15">
                   {filteredProjects.map((project) => (
                     <li key={project.id}>
                       <button
                         onClick={() => setSelectedProject(project)}
-                        className="w-full flex items-center gap-4 px-2 py-2 text-left cursor-pointer hover:bg-ink hover:text-beige-light"
+                        className="w-full flex items-center gap-4 px-2 py-2 text-left cursor-pointer hover:bg-phosphor hover:text-ink"
                       >
                         <TypeBadge type={project.type} />
                         <span className="b1 flex-1 truncate">{project.title}</span>
@@ -114,7 +114,7 @@ export default function Projects() {
 
               {filteredProjects.length === 0 && (
                 <div className="text-center py-16">
-                  <p className="h3 text-ink/40 mb-4">No projects found</p>
+                  <p className="h3 text-beige-light/60 mb-4">No projects found</p>
                   <button
                     onClick={() => { setTypeFilter('All'); setSearch(''); setSortDirection('desc'); }}
                     className="bevel-out px-6 py-2 bg-beige b2 cursor-pointer hover:bg-ink hover:text-white"

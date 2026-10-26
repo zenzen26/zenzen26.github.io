@@ -15,6 +15,8 @@ interface MacWindowProps {
   /** Drag by the title bar on wide screens (xl+); returns home on "Reset view". */
   draggable?: boolean;
   className?: string;
+  /** Title bar colour classes (default beige). Include a text colour for dark bars. */
+  barClassName?: string;
   bodyClassName?: string;
 }
 
@@ -26,6 +28,7 @@ export default function MacWindow({
   reveal = false,
   draggable = false,
   className = '',
+  barClassName = 'bg-beige',
   bodyClassName = '',
 }: MacWindowProps) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -70,7 +73,7 @@ export default function MacWindow({
       data-win={reveal ? '' : undefined}
       className={`bevel-out bg-beige-light text-ink flex flex-col min-w-0 ${className}`}
     >
-      <div ref={barRef} className={`flex items-center gap-2 border-b-2 border-ink bg-beige px-2 py-1 ${draggable ? 'xl:cursor-grab xl:active:cursor-grabbing select-none' : ''}`}>
+      <div ref={barRef} className={`flex items-center gap-2 border-b-2 border-ink ${barClassName} px-2 py-1 ${draggable ? 'xl:cursor-grab xl:active:cursor-grabbing select-none' : ''}`}>
         {onClose ? (
           <button
             type="button"
@@ -82,7 +85,7 @@ export default function MacWindow({
           <span className="size-5 shrink-0" />
         )}
         <span className="titlebar-stripes h-4 flex-1" />
-        <span className="font-pixel b2 px-2 bg-beige truncate max-w-[70%]">{title}</span>
+        <span className="font-pixel b2 px-2 bg-inherit truncate max-w-[70%]">{title}</span>
         <span className="titlebar-stripes h-4 flex-1" />
         <span className="size-5 shrink-0" />
       </div>

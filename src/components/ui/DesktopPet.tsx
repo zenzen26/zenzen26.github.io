@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } f
 import { gsap } from 'gsap';
 import PixelSprite from '@/components/ui/PixelSprite';
 import { PET_FRAMES, type PetPose } from '@/lib/petCat';
+import { CAT_EVENT } from '@/lib/catEvent';
 
 const SPEED = 60; // px per second
 const SCALE = 4;
@@ -79,9 +80,16 @@ export default function DesktopPet() {
     setBubble(true);
     window.setTimeout(() => setBubble(false), 1300);
     if (hopRef.current) {
-      gsap.fromTo(hopRef.current, { y: 0 }, { y: -22, yoyo: true, repeat: 1, duration: 0.15, ease: 'steps(3)' });
+      gsap.fromTo(hopRef.current, { y: 0 }, { y: -22, yoyo: true, repeat: 1, duration: 0.15, ease: 'steps(3)', clearProps: 'transform' });
     }
   };
+
+  // The Mac's `cat` command makes the pet say hi too.
+  useEffect(() => {
+    window.addEventListener(CAT_EVENT, meow);
+    return () => window.removeEventListener(CAT_EVENT, meow);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onPointerDown = (e: ReactPointerEvent<HTMLButtonElement>) => {
     window.clearTimeout(timer.current);
@@ -126,7 +134,7 @@ export default function DesktopPet() {
       ease: 'power2.in',
       onComplete: () => {
         if (hopRef.current) {
-          gsap.fromTo(hopRef.current, { scaleY: 0.7, transformOrigin: '50% 100%' }, { scaleY: 1, duration: 0.25, ease: 'bounce.out' });
+          gsap.fromTo(hopRef.current, { scaleY: 0.7, transformOrigin: '50% 100%' }, { scaleY: 1, duration: 0.25, ease: 'bounce.out', clearProps: 'transform,transformOrigin' });
         }
         settle();
       },
@@ -151,9 +159,11 @@ export default function DesktopPet() {
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
-        className={`pointer-events-auto touch-none select-none block ${mode === 'held' ? 'cursor-grabbing' : 'cursor-grab'} ${facing === -1 ? '-scale-x-100' : ''} ${mode === 'walk' && step ? '-translate-y-1' : ''}`}
+        className={`pointer-events-auto touch-none select-none block ${mode === 'held' ? 'cursor-grabbing' : 'cursor-grab'}`}
       >
-        <PixelSprite grid={PET_FRAMES[pose]} scale={SCALE} />
+        <div className={`${facing === -1 ? '-scale-x-100' : ''} ${mode === 'walk' && step ? '-translate-y-1' : ''}`}>
+          <PixelSprite grid={PET_FRAMES[pose]} scale={SCALE} />
+        </div>
       </button>
     </div>
   );

@@ -38,7 +38,7 @@ export default function FloppyIcon({ label, caption, imageUrl, tone = 'ink', onC
             {imageUrl ? (
               <img src={imageUrl} alt="" className="size-full object-cover" />
             ) : (
-              <div className="flex size-full items-center justify-center font-pixel font-bold text-2xl text-ink group-hover:scale-110 transition-transform">
+              <div className="flex size-full items-center justify-center font-pixel font-bold text-sm sm:text-xl lg:text-2xl whitespace-nowrap text-ink group-hover:scale-110 transition-transform">
                 {label}
               </div>
             )}

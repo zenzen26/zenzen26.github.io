@@ -1,6 +1,5 @@
 import { Mail, Phone, MapPin, Github, Linkedin, LayoutDashboard } from 'lucide-react';
 import FloppyIcon from '@/components/ui/FloppyIcon';
-import PixelCat from '@/components/ui/PixelCat';
 import MacWindow from '@/components/ui/MacWindow';
 
 const resumes = [
@@ -76,7 +75,7 @@ export default function FooterResume() {
 
         <div className="border-t-2 border-phosphor/40 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <PixelCat scale={3} className="animate-pixel-bob" />
+            <img src="/favicon.png" alt="" className="size-10 object-contain" />
             <p className="h4">ZENZEN</p>
           </div>
           <p className="b3 opacity-60">© {new Date().getFullYear()} All rights reserved. ฅ^•ﻌ•^ฅ</p>

@@ -6,6 +6,8 @@ import { gsap } from 'gsap';
 import PixelCat from '@/components/ui/PixelCat';
 import { themeColor } from '@/lib/pixelCat';
 import { RESET_VIEW_EVENT } from '@/lib/viewReset';
+import { CAT_EVENT } from '@/lib/catEvent';
+import { PET_FRAMES } from '@/lib/petCat';
 
 /** Turn limit ±25° left/right, only ±8° up/down; resting poses snap to 12.5° / 4° steps. */
 const LIMIT_Y = (25 * Math.PI) / 180;
@@ -33,6 +35,10 @@ interface ScreenState {
   typed: string;
   /** Result line of the last command typed on the keyboard. */
   output: string;
+  /** Real-keyboard typing is on (after clicking the screen). */
+  focus: boolean;
+  /** Show the "it's a cat!" popup until this timestamp. */
+  catUntil: number;
   hover: string | null;
 }
 
@@ -131,8 +137,56 @@ function drawScreen(ctx: CanvasRenderingContext2D, s: ScreenState, cursorOn: boo
     ctx.fillText(`> ${s.typed}${cursorOn ? '_' : ' '}`, 40, 566);
     if (!s.typed && !s.output) {
       ctx.fillStyle = 'rgba(236,233,221,0.45)';
-      ctx.fillText('(type "help" then ENTER)', 150, 566);
+      ctx.fillText(s.focus ? '(typing... ENTER runs, ESC stops)' : '(click the screen and type: try "help")', 150, 566);
     }
+  }
+
+  if (s.focus) {
+    ctx.strokeStyle = phosphor;
+    ctx.lineWidth = 6;
+    ctx.strokeRect(6, 54, W - 12, H - 60);
+  }
+
+  // `cat` command: you expected a file? It's a cat!
+  if (s.on && performance.now() < s.catUntil) {
+    const px = 100;
+    const py = 110;
+    const pw = 600;
+    const ph = 350;
+    const colors: Record<string, string> = { o: themeColor('calico'), y: themeColor('tabby'), g: phosphor, k: themeColor('blush'), w: '#ffffff' };
+    ctx.fillStyle = ink;
+    ctx.fillRect(px + 8, py + 8, pw, ph);
+    ctx.fillStyle = light;
+    ctx.fillRect(px, py, pw, ph);
+    ctx.fillStyle = themeColor('beige');
+    ctx.fillRect(px, py, pw, 44);
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = 4;
+    ctx.strokeRect(px, py, pw, ph);
+    ctx.beginPath();
+    ctx.moveTo(px, py + 44);
+    ctx.lineTo(px + pw, py + 44);
+    ctx.stroke();
+    ctx.fillStyle = ink;
+    ctx.font = '30px "Pixelify Sans", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('cat.txt', px + pw / 2, py + 32);
+    const frame = PET_FRAMES.idle;
+    const sc = 11;
+    const ox = px + (pw - frame[0].length * sc) / 2;
+    frame.forEach((row, y) =>
+      [...row].forEach((c, x) => {
+        if (!colors[c]) return;
+        ctx.fillStyle = colors[c];
+        ctx.fillRect(ox + x * sc, py + 66 + y * sc, sc, sc);
+      })
+    );
+    ctx.fillStyle = ink;
+    ctx.font = '32px "VT323", monospace';
+    ctx.fillText('you thought you were going to read a file?', px + pw / 2, py + 222 + 40);
+    ctx.font = '700 40px "Pixelify Sans", monospace';
+    ctx.fillText('nope. it is a cat!  =^..^=', px + pw / 2, py + 222 + 90);
+    ctx.textAlign = 'left';
   }
 
   // scanlines
@@ -368,7 +422,7 @@ function PushButton({ position, size = 0.18, color, glyph, onPress }: { position
 }
 
 function MacModel() {
-  const ui = useRef<ScreenState>({ on: true, bootStart: performance.now(), typed: '', output: '', hover: null });
+  const ui = useRef<ScreenState>({ on: true, bootStart: performance.now(), typed: '', output: '', focus: false, catUntil: 0, hover: null });
   const { texture } = useScreen(ui);
   const [power, setPower] = useState(true);
   const [bright, setBright] = useState(2);
@@ -413,11 +467,17 @@ function MacModel() {
   /** Tiny command line: type a word on the keyboard, press ENTER. */
   const runCommand = (raw: string): string => {
     const cmd = raw.trim().toLowerCase();
+    // `cat <anything>` normally prints a file. Not here.
+    if (cmd === 'cat' || cmd.startsWith('cat ')) {
+      ui.current.catUntil = performance.now() + 5000;
+      window.dispatchEvent(new Event(CAT_EVENT));
+      return 'mrrp!';
+    }
     switch (cmd) {
       case '':
         return '';
       case 'help':
-        return 'try: projects skills experience contact cat clear';
+        return 'try: projects skills experience contact cat <file> clear';
       case 'projects':
         goTo('#projects');
         return 'opening projects...';
@@ -430,8 +490,6 @@ function MacModel() {
       case 'contact':
         goTo('#footer');
         return 'opening contact...';
-      case 'cat':
-        return 'mrrp! =^..^=';
       case 'clear':
         return '';
       default:
@@ -443,6 +501,7 @@ function MacModel() {
     const state = ui.current;
     if (!state.on) return;
     if (c === '\n') {
+      state.catUntil = 0;
       state.output = runCommand(state.typed);
       state.typed = '';
     } else if (c === '\b') {
@@ -451,6 +510,33 @@ function MacModel() {
       state.typed = (state.typed + c).slice(-26);
     }
   };
+
+  // Real keyboard: click the screen to start typing, ESC or a click elsewhere to stop.
+  const typeRef = useRef(type);
+  typeRef.current = type;
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!ui.current.focus) return;
+      if (e.key === 'Escape') {
+        ui.current.focus = false;
+        return;
+      }
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const c = e.key === 'Enter' ? '\n' : e.key === 'Backspace' ? '\b' : e.key.length === 1 ? e.key : null;
+      if (c === null) return;
+      e.preventDefault();
+      typeRef.current(c);
+    };
+    const onDown = (e: PointerEvent) => {
+      if (!(e.target as HTMLElement).closest('canvas')) ui.current.focus = false;
+    };
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('pointerdown', onDown);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('pointerdown', onDown);
+    };
+  }, []);
 
   const level = BRIGHTNESS[bright];
 
@@ -475,7 +561,12 @@ function MacModel() {
           e.stopPropagation();
           if (e.delta > 5) return;
           const b = hitButton(e);
-          if (b) document.querySelector(b.target)?.scrollIntoView({ behavior: 'smooth' });
+          if (b) {
+            document.querySelector(b.target)?.scrollIntoView({ behavior: 'smooth' });
+          } else if (ui.current.on) {
+            ui.current.focus = true;
+            ui.current.catUntil = 0;
+          }
         }}
         onPointerMove={(e) => {
           const b = hitButton(e);

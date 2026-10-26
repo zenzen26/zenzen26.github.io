@@ -1,7 +1,7 @@
 import { useEffect, useRef, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { GraduationCap, Mail, Globe, ShieldCheck, RotateCcw } from 'lucide-react';
+import { GraduationCap, Mail, Globe, ShieldCheck, RotateCcw, LoaderCircle } from 'lucide-react';
 import FeaturedProjects from '@/components/FeaturedProjects';
 import IndustriesTech from '@/components/IndustriesTech';
 import StickyExperience from '@/components/StickyExperience';
@@ -13,7 +13,6 @@ import { resetView } from '@/lib/viewReset';
 import Container from '@/components/ui/Container';
 import MacWindow from '@/components/ui/MacWindow';
 import PageLoader from '@/components/ui/PageLoader';
-import PixelCat from '@/components/ui/PixelCat';
 import { useCSVData } from '@/hooks/useCSVData';
 import { useWindowReveal } from '@/hooks/useWindowReveal';
 import type { Project, Experience } from '@/types';
@@ -57,7 +56,14 @@ export default function Home() {
       <section id="hero" className="relative pt-12 pb-6">
         <h1 className="sr-only">ZENZEN — Web Developer &amp; Server Engineer</h1>
         <div className="h-[calc(100svh-4rem)] min-h-[520px]">
-          <Suspense fallback={<div className="size-full flex items-center justify-center"><PixelCat scale={10} className="animate-pixel-bob" /></div>}>
+          <Suspense
+            fallback={
+              <div className="size-full flex flex-col items-center justify-center gap-3" role="status">
+                <LoaderCircle size={44} className="animate-spin text-phosphor" />
+                <span className="b1">Loading model...</span>
+              </div>
+            }
+          >
             <Mac3D className="size-full" />
           </Suspense>
         </div>
@@ -101,25 +107,25 @@ export default function Home() {
 
       <section className="py-16 sm:py-20 bg-moss/25">
         <Container>
-          <MacWindow title="ReadMe — Personal Details" reveal bodyClassName="p-6 sm:p-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <MacWindow title="ReadMe.txt" reveal bodyClassName="p-6 sm:p-10">
+            <dl className="mx-auto max-w-3xl space-y-5">
               {[
-                { icon: <Globe size={24} />, title: 'Languages', items: personalDetails.languages },
-                { icon: <ShieldCheck size={24} />, title: 'Certificates & Licenses', items: personalDetails.certificates },
-                { icon: <GraduationCap size={24} />, title: 'Education', items: [personalDetails.education] },
-                { icon: <Mail size={24} />, title: 'Contact', items: personalDetails.contact },
-              ].map(({ icon, title, items }) => (
-                <div key={title} className="bevel-in bg-white p-5">
-                  <div className="flex items-center gap-3 mb-3 text-moss">
-                    {icon}
-                    <h4 className="h4 text-ink">{title}</h4>
-                  </div>
-                  <ul className="b2 space-y-1 text-ink/80">
-                    {items.map((item) => <li key={item}>{item}</li>)}
-                  </ul>
+                { icon: Globe, title: 'Languages', items: personalDetails.languages },
+                { icon: ShieldCheck, title: 'Certificates', items: personalDetails.certificates },
+                { icon: GraduationCap, title: 'Education', items: [personalDetails.education] },
+                { icon: Mail, title: 'Contact', items: personalDetails.contact },
+              ].map(({ icon: Icon, title, items }) => (
+                <div key={title} className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
+                  <dt className="flex shrink-0 items-center gap-2 font-pixel text-xl">
+                    <Icon size={18} className="text-moss" /> {title}
+                  </dt>
+                  <span aria-hidden="true" className="hidden sm:block flex-1 border-b-2 border-dotted border-ink/40" />
+                  <dd className="b2 sm:text-right">
+                    {items.map((item) => <div key={item}>{item}</div>)}
+                  </dd>
                 </div>
               ))}
-            </div>
+            </dl>
           </MacWindow>
         </Container>
       </section>
