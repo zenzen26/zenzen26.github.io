@@ -74,7 +74,7 @@ export default function Home() {
         <div className="hidden xl:block absolute left-8 top-1/2 -translate-y-1/2 z-10 w-72">
           <HeroHelp />
         </div>
-        <div className="hidden xl:block absolute right-8 top-1/2 -translate-y-1/2 z-10 w-80">
+        <div className="hidden xl:block absolute right-8 top-1/2 -translate-y-1/2 z-10 w-96 2xl:w-[28rem]">
           <HeroIntro />
         </div>
         <Container className="xl:hidden mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">

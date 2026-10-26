@@ -4,7 +4,7 @@ import { RoundedBox, useCursor } from '@react-three/drei';
 import { CanvasTexture, CatmullRomCurve3, Color, NearestFilter, Vector3, type Group, type Mesh } from 'three';
 import { gsap } from 'gsap';
 import PixelCat from '@/components/ui/PixelCat';
-import { PIXEL_CAT_GRID, themeColor } from '@/lib/pixelCat';
+import { themeColor } from '@/lib/pixelCat';
 import { RESET_VIEW_EVENT } from '@/lib/viewReset';
 
 /** Rotation limit on each axis (±25°); resting poses snap to 12.5° steps. */
@@ -41,7 +41,6 @@ function drawScreen(ctx: CanvasRenderingContext2D, s: ScreenState, cursorOn: boo
   const phosphor = themeColor('phosphor');
   const ink = themeColor('ink');
   const light = themeColor('beige-light');
-  const catColors: Record<string, string> = { '#': ink, g: phosphor, p: themeColor('grey'), w: '#ffffff' };
   const W = SCREEN_W;
   const H = SCREEN_H;
 
@@ -77,18 +76,6 @@ function drawScreen(ctx: CanvasRenderingContext2D, s: ScreenState, cursorOn: boo
     ctx.fillRect(0, 44, W, 3);
     ctx.font = '30px "Pixelify Sans", monospace';
     ctx.fillText('File   Edit   View   Special', 20, 32);
-
-    // pixel cat
-    const s8 = 11;
-    PIXEL_CAT_GRID.forEach((row, y) =>
-      [...row].forEach((c, x) => {
-        if (!catColors[c]) return;
-        ctx.fillStyle = catColors[c];
-        ctx.fillRect(610 + x * s8, 90 + y * s8, s8, s8);
-      })
-    );
-    ctx.fillStyle = light;
-    ctx.fillRect(606, 90 + PIXEL_CAT_GRID.length * s8 + 6, 14 * s8 + 8, 4);
 
     // status tag
     ctx.fillStyle = phosphor;

@@ -137,10 +137,10 @@ body, .b1, .b2, .b3, p, span, div, a, button, input, textarea, select, label {
   color: var(--color-phosphor);
 }
 
-/* 1px black outline around a pixel sprite so it reads on any background */
+/* Light outline around a pixel sprite so dark sprites (the black cat) read on the dark desktop */
 @utility pixel-outline {
-  filter: drop-shadow(2px 0 0 var(--color-ink)) drop-shadow(-2px 0 0 var(--color-ink))
-    drop-shadow(0 2px 0 var(--color-ink)) drop-shadow(0 -2px 0 var(--color-ink));
+  filter: drop-shadow(2px 0 0 var(--color-beige-light)) drop-shadow(-2px 0 0 var(--color-beige-light))
+    drop-shadow(0 2px 0 var(--color-beige-light)) drop-shadow(0 -2px 0 var(--color-beige-light));
 }
 
 /* Classic Mac window title bar: horizontal pinstripes */

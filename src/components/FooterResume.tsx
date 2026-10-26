@@ -59,7 +59,7 @@ export default function FooterResume() {
           </div>
 
           <MacWindow title="Resume Hub" className="text-ink" bodyClassName="p-5 sm:p-6">
-            <p className="b3 text-ink/60 mb-4">Double-click a disk to download.</p>
+            <p className="b3 text-ink/60 mb-4">Click a disk to download.</p>
             <div className="grid grid-cols-3 gap-3">
               {resumes.map((resume) => (
                 <FloppyIcon

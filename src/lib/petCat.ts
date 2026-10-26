@@ -1,49 +1,55 @@
 /**
- * Chubby side-view calico desktop pet, facing right (22 px wide). Palette: see
- * PixelSprite (# black patch/eyes, o orange, w white, k pink nose). Each row is
- * built from a body half (x0–11) and a head half (x12–21).
+ * Squat, loaf-shaped desktop pet that mirrors the header icon: black cat, orange
+ * forehead patch, pink inner ears, green eyes, white muzzle, orange-striped tail.
+ * Faces right, 22 px wide. Palette: see PixelSprite (# black, o orange, k pink,
+ * g green, w white). Each row is a body half (x0–8) plus a head half (x9–21).
  */
 const LEFT = [
-  '............',
-  '............',
-  '#...........',
-  '##..........',
-  '.#..wwwwwwww',
-  '..#wwooowwww',
-  '..wwwwoowwww',
-  '..wwwwwwwwww',
-  '..wwww##wwww',
-  '..wwwwwwwwww',
-  '...wwwwwwwww',
+  '.........',
+  '.........',
+  '.........',
+  '.........',
+  '.........',
+  '.########',
+  'o########',
+  '#o#oo####',
+  '.o#######',
+  '.########',
 ];
 
 const RIGHT = [
-  '.oo....##.',
-  '.oowwwww##',
-  'oowwwwwwww',
-  'wwwwwwwwww',
-  'ww#wwww#ww',
-  'wwwwwwwwkk',
-  'wwwwwwww#w',
-  '.wwwwwwww.',
-  'wwwwww....',
-  'ww........',
-  'w.........',
+  '.#........#..',
+  '#k#......#k#.',
+  '#ooo########.',
+  'oo##########.',
+  '##g#####g###.',
+  '#######wwwk#.',
+  '######wwwww#.',
+  '.#####www###.',
+  '###########..',
+  '##########...',
 ];
+
+const WIDTH = 22;
+const pad = (row: string) => row.padEnd(WIDTH, '.');
 
 const compose = (right: readonly string[], legs: readonly string[]) => [
   ...LEFT.map((row, i) => row + right[i]),
-  ...legs,
+  ...legs.map(pad),
 ];
 
-const EYES_OPEN = 4;
-const blinkRight = RIGHT.map((row, i) => (i === EYES_OPEN ? 'wwwwwwwwww' : row));
+const EYES_ROW = 4;
+const blinkRight = RIGHT.map((row, i) => (i === EYES_ROW ? '############.' : row));
+
+const IDLE = ['..##..##....##..##', '..ww..ww....ww..ww'];
+const STEP_A = ['..##.......##', '.ww.........ww'];
+const STEP_B = ['.....##.......##', '.....ww.......ww'];
 
 export const PET_FRAMES = {
-  idle: compose(RIGHT, ['....ww.......ww.......', '....ww.......ww.......']),
-  blink: compose(blinkRight, ['....ww.......ww.......', '....ww.......ww.......']),
-  walkA: compose(RIGHT, ['...ww.......ww........', '..ww.........ww.......']),
-  walkB: compose(RIGHT, ['.....ww.......ww......', '.....ww........ww.....']),
+  idle: compose(RIGHT, IDLE),
+  blink: compose(blinkRight, IDLE),
+  walkA: compose(RIGHT, STEP_A),
+  walkB: compose(RIGHT, STEP_B),
 } as const;
 
 export type PetPose = keyof typeof PET_FRAMES;
