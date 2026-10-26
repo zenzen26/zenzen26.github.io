@@ -24,6 +24,7 @@ export interface Detail {
 export type Effect =
   | { type: 'scroll'; selector: string }
   | { type: 'cat' }
+  | { type: 'joy' }
   | { type: 'clear' }
   | { type: 'exit' }
   | { type: 'detail'; detail: Detail };
@@ -283,7 +284,7 @@ export function runTerminal(raw: string, cwd: Dir, data: TermData): TermResult {
       const name = arg.replace(/[^\w.-]/g, '').slice(0, USER_MAX).toLowerCase();
       if (!name) return done(['usage: login <name>']);
       setUser(name);
-      return done([`welcome, ${name}`]);
+      return done([`welcome, ${name}`], [{ type: 'joy' }]);
     }
     case 'clear':
       return done([], [{ type: 'clear' }]);

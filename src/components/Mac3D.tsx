@@ -6,7 +6,7 @@ import { gsap } from 'gsap';
 import PixelCat from '@/components/ui/PixelCat';
 import { themeColor } from '@/lib/pixelCat';
 import { RESET_VIEW_EVENT } from '@/lib/viewReset';
-import { CAT_EVENT } from '@/lib/catEvent';
+import { CAT_EVENT, JOY_EVENT } from '@/lib/catEvent';
 import { SCREEN_W, SCREEN_H, createScreen, drawScreen, screenButtons, scrollTerm, submit, typeChar, TERM_PAGE, type ScreenState } from '@/lib/macScreen';
 import type { Effect, TermData } from '@/lib/terminal';
 
@@ -299,6 +299,7 @@ function MacModel({ data }: { data: TermData }) {
   const runEffects = (effects: Effect[]) => {
     effects.forEach((fx) => {
       if (fx.type === 'scroll') goTo(fx.selector);
+      else if (fx.type === 'joy') window.dispatchEvent(new Event(JOY_EVENT));
       else if (fx.type === 'cat') {
         ui.current.catUntil = performance.now() + 5000;
         window.dispatchEvent(new Event(CAT_EVENT));
@@ -488,14 +489,21 @@ function MacModel({ data }: { data: TermData }) {
 function Rig({ rot, dragging, data }: { rot: MutableRefObject<Rotation>; dragging: MutableRefObject<boolean>; data: TermData }) {
   const group = useRef<Group>(null);
   const aspect = useThree((s) => s.size.width / s.size.height);
+  const width = useThree((s) => s.size.width);
   const camera = useThree((s) => s.camera);
   // Pull the camera back on narrow screens so the keyboard and mouse never get cropped.
   useEffect(() => {
     // Portrait phones: fill the width with the screen (case sides may crop); landscape: fit the whole desk.
-    const z = aspect < 1 ? Math.max(7.2, 2.9 / (0.573 * aspect)) : Math.max(9.4, 12.5 / aspect);
+    // (tablets in portrait are wide enough to show the whole desk, keyboard included)
+    const z =
+      aspect >= 1
+        ? Math.max(9.4, 12.5 / aspect)
+        : width < 600
+          ? Math.max(7.2, 2.9 / (0.573 * aspect))
+          : Math.max(8.2, 4.8 / (0.573 * aspect));
     camera.position.set(0, 0.4, z);
     camera.lookAt(0, -0.1, 0);
-  }, [camera, aspect]);
+  }, [camera, aspect, width]);
   useFrame(({ clock }) => {
     if (!group.current) return;
     group.current.rotation.set(rot.current.x, rot.current.y, 0);
@@ -524,6 +532,7 @@ export default function Mac3D({ className = '', projects, experiences }: { class
   const last = useRef({ x: 0, y: 0 });
   const idleTimer = useRef<number | undefined>(undefined);
   const [webgl] = useState(hasWebGL);
+  const [grabbing, setGrabbing] = useState(false);
 
   useEffect(() => () => { window.clearTimeout(idleTimer.current); gsap.killTweensOf(rot.current); }, []);
 
@@ -542,6 +551,7 @@ export default function Mac3D({ className = '', projects, experiences }: { class
   // Window-level listeners so r3f still receives its own click events on the canvas.
   const onDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     dragging.current = true;
+    setGrabbing(true);
     last.current = { x: e.clientX, y: e.clientY };
     window.clearTimeout(idleTimer.current);
     gsap.killTweensOf(rot.current);
@@ -559,6 +569,7 @@ export default function Mac3D({ className = '', projects, experiences }: { class
       window.removeEventListener('pointerup', up);
       window.removeEventListener('pointercancel', up);
       dragging.current = false;
+      setGrabbing(false);
       settle(snap(rot.current.x, SNAP_STEP_X, LIMIT_X), snap(rot.current.y, SNAP_STEP_Y, LIMIT_Y), 0.6);
       idleTimer.current = window.setTimeout(() => settle(0, 0, 0.9), IDLE_RETURN_MS);
     };
@@ -577,7 +588,7 @@ export default function Mac3D({ className = '', projects, experiences }: { class
 
   return (
     <div
-      className={`relative select-none touch-pan-y md:touch-none ${className}`}
+      className={`relative select-none touch-pan-y md:touch-none ${grabbing ? 'cursor-grabbing' : ''} ${className}`}
       onPointerDown={onDown}
       role="img"
       aria-label="Interactive 3D Macintosh showing my portfolio. Drag to rotate; click its buttons, keys and screen."

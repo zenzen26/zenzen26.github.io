@@ -1,6 +1,8 @@
 interface FloppyIconProps {
   label: string;
   caption?: string;
+  /** Tiny extra line under the caption (e.g. a last-updated date). */
+  note?: string;
   /** Optional picture printed on the disk label. */
   imageUrl?: string;
   /** Plastic case colour. */
@@ -16,7 +18,7 @@ const CASE: Record<NonNullable<FloppyIconProps['tone']>, string> = {
 };
 
 /** Floppy disk desktop icon with a Mac-style label underneath. */
-export default function FloppyIcon({ label, caption, imageUrl, tone = 'ink', onClick, className = '' }: FloppyIconProps) {
+export default function FloppyIcon({ label, caption, note, imageUrl, tone = 'ink', onClick, className = '' }: FloppyIconProps) {
   return (
     <button
       type="button"
@@ -46,6 +48,7 @@ export default function FloppyIcon({ label, caption, imageUrl, tone = 'ink', onC
         </div>
       </div>
       {caption && <span className="b3 text-ink/60">{caption}</span>}
+      {note && <span className="text-xs text-ink/50 -mt-1">{note}</span>}
     </button>
   );
 }

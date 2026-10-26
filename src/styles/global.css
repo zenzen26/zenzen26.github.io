@@ -171,3 +171,80 @@ body, .b1, .b2, .b3, p, span, div, a, button, input, textarea, select, label {
     scroll-behavior: auto !important;
   }
 }
+
+/* ------------------------------------------------------------
+   Mickey-glove pixel cursors (public/cursors): arrow, hand, pressed,
+   disabled, grab. Unlayered on purpose so they win over Tailwind's
+   cursor-* utilities. Hotspots: arrow/disabled 0,0; hand 10,0; pressed 10,4.
+   ------------------------------------------------------------ */
+html {
+  cursor: url('/cursors/arrow.svg') 0 0, auto;
+}
+
+a,
+button,
+summary,
+select,
+[role='button'],
+.cursor-pointer,
+.cursor-zoom-in {
+  cursor: url('/cursors/hand.svg') 10 0, pointer;
+}
+
+/* while the mouse button is down */
+a:active,
+button:active,
+summary:active,
+[role='button']:active,
+.cursor-pointer:active,
+.cursor-zoom-in:active {
+  cursor: url('/cursors/pressed.svg') 10 4, pointer;
+}
+
+/* picked up / dragging */
+.cursor-grab,
+.cursor-grab:active,
+.cursor-grabbing,
+button.cursor-grabbing,
+button.cursor-grabbing:active {
+  cursor: url('/cursors/grab.svg') 16 10, grab;
+}
+
+/* disabled things: last, so it beats the hand and pressed rules */
+button:disabled,
+[disabled],
+[aria-disabled='true'],
+.cursor-not-allowed,
+button:disabled:active,
+[aria-disabled='true']:active {
+  cursor: url('/cursors/disabled.svg') 0 0, not-allowed;
+}
+
+/* three.js (drei useCursor) writes an inline cursor on <body> while hovering the 3D Mac */
+body[style*='cursor: pointer'],
+body[style*='cursor:pointer'] {
+  cursor: url('/cursors/hand.svg') 10 0, pointer !important;
+}
+
+body[style*='cursor: grab'],
+body[style*='cursor:grab'] {
+  cursor: url('/cursors/grab.svg') 16 10, grab !important;
+}
+
+/* Desktop pet: purring tremble and rising hearts */
+@keyframes purr {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 1px 0; }
+}
+.animate-purr {
+  animation: purr 0.09s steps(1) infinite;
+}
+
+@keyframes heart-rise {
+  0% { opacity: 0; translate: 0 0; }
+  20% { opacity: 1; }
+  100% { opacity: 0; translate: 0 -34px; }
+}
+.animate-heart {
+  animation: heart-rise 1.4s steps(7) infinite;
+}
