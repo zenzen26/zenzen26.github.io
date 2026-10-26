@@ -1,4 +1,4 @@
-import { PawPrint } from 'lucide-react';
+import PixelCat from '@/components/ui/PixelCat';
 
 interface PageLoaderProps {
   /** Add top padding when nav is visible (default: true) */
@@ -7,9 +7,10 @@ interface PageLoaderProps {
 
 export default function PageLoader({ withNavOffset = true }: PageLoaderProps) {
   return (
-    <div className={`min-h-screen flex items-center justify-center ${withNavOffset ? 'pt-20' : ''}`}>
-      <div className="h2 animate-pulse text-amber flex items-center gap-3">
-        <PawPrint size={40} /> Loading...
+    <div className={`min-h-screen flex flex-col items-center justify-center gap-4 ${withNavOffset ? 'pt-20' : ''}`}>
+      <PixelCat scale={8} className="animate-pixel-bob" />
+      <div className="h4">
+        Loading<span className="cursor-blink">_</span>
       </div>
     </div>
   );

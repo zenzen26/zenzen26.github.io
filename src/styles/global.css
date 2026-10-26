@@ -1,158 +1,163 @@
 /* ============================================================
-   global.css — Shared, site-wide styles
+   global.css — Shared, site-wide styles ("Zen OS" retro Mac theme)
    Loaded once in main.tsx. Contains:
      - Self-hosted font @font-face declarations (WOFF2)
-     - Tailwind import + @theme tokens
-     - Base typography (h1–h4, b1–b3) and resets
-     - Utilities shared across MORE THAN ONE page/component
-   Component/page-specific rules live in co-located CSS files
-   (e.g. Hero.css, Navigation.css, StickyExperience.css).
+     - Tailwind import + @theme tokens (beige / grey / greens / ink)
+     - Base typography (h1–h4 pixel, b1–b3 terminal) and resets
+     - Shared utilities: bevel-out / bevel-in / dither / scanlines
+   Component-specific rules live in components (Tailwind utilities).
    ============================================================ */
 
-/* ------------------------------------------------------------
-   Self-hosted fonts (WOFF2) — replaces the Google Fonts CDN.
-   Files live in /public/fonts and are preloaded in index.html.
-   ------------------------------------------------------------ */
 @font-face {
-  font-family: 'Permanent Marker';
+  font-family: 'Pixelify Sans';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/fonts/permanent-marker-v16-latin-400.woff2') format('woff2');
+  src: url('/fonts/pixelify-sans-400.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: 'Share Tech Mono';
+  font-family: 'Pixelify Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/pixelify-sans-700.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'VT323';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/fonts/share-tech-mono-v16-latin-400.woff2') format('woff2');
+  src: url('/fonts/vt323-400.woff2') format('woff2');
 }
 
 @import "tailwindcss";
+
+@theme {
+  /* Macintosh case + CRT palette */
+  --color-beige: #d6d2c4;
+  --color-beige-light: #ece9dd;
+  --color-grey: #9e9b8e;
+  --color-forest: #10281b;
+  --color-forest-deep: #0a1a11;
+  --color-moss: #2f6f46;
+  --color-phosphor: #55f28b;
+  --color-ink: #0b0b0b;
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --font-pixel: "Pixelify Sans", monospace;
+  --font-term: "VT323", monospace;
+  --breakpoint-4xl: 1920px;
+}
+
+/* Read from JS (three.js) only, so `static` keeps them from being tree-shaken. */
+@theme static {
+  /* Apple "Platinum" beige plastic for the 3D Mac case */
+  --color-plastic: #d5cdb5;
+  --color-plastic-dark: #b4ab91;
+}
 
 html, body {
   max-width: 100vw;
   overflow-x: hidden;
 }
 
-img {
-  max-width: 100%;
-  height: auto;
+@layer base {
+  * { box-sizing: border-box; }
+  img, canvas, video { max-width: 100%; height: auto; display: block; }
 }
 
-canvas {
-  max-width: 100% !important;
+/* Dark desktop: forest green with a faint phosphor dither dot pattern */
+body {
+  background-color: var(--color-forest);
+  background-image: radial-gradient(rgb(85 242 139 / 0.08) 1px, transparent 1px);
+  background-size: 4px 4px;
+  color: var(--color-beige-light);
+  font-family: "VT323", monospace;
+  font-size: 22px;
+  line-height: 1.3;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: auto;
 }
 
-@theme {
-  --color-green: #519A66;
-  --color-amber: #FFAA00;
-  --color-red: #DA3D20;
-  --color-black: #000000;
-  --color-white: #FFFFFF;
-  --color-paper: #FFFFFF;
-  --color-paper-dark: #F9FAFB;
-  --font-permanent-marker: "Permanent Marker", cursive;
-  --font-share-tech: "Share Tech Mono", monospace;
-  --breakpoint-4xl: 1920px;
-}
-
-/* Base Typography - Permanent Marker Headers (h1-h4) */
+/* Typography: pixel headings (h1–h4), terminal body (b1–b3) */
 h1, h2, h3, h4, .h1, .h2, .h3, .h4 {
-  font-family: "Permanent Marker", cursive;
-  font-weight: 400;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
+  font-family: "Pixelify Sans", monospace;
+  font-weight: 700;
+  line-height: 1.1;
   margin: 0;
 }
 
-h1, .h1 { font-size: clamp(48px, 6vw + 24px, 96px); }
-h2, .h2 { font-size: clamp(36px, 4vw + 16px, 64px); }
-h3, .h3 { font-size: clamp(28px, 3vw + 12px, 48px); }
-h4, .h4 { font-size: clamp(22px, 2vw + 10px, 32px); }
+h1, .h1 { font-size: clamp(44px, 6vw + 16px, 96px); }
+h2, .h2 { font-size: clamp(32px, 3.5vw + 12px, 60px); }
+h3, .h3 { font-size: clamp(24px, 2.5vw + 8px, 40px); }
+h4, .h4 { font-size: clamp(20px, 1.5vw + 8px, 28px); }
 
-/* Body Typography - Monospace (b1-b3) */
 body, .b1, .b2, .b3, p, span, div, a, button, input, textarea, select, label {
-  font-family: "Share Tech Mono", monospace;
+  font-family: "VT323", monospace;
   font-weight: 400;
 }
 
-.b1 { font-size: clamp(18px, 1vw + 12px, 22px); line-height: 1.6; }
-.b2 { font-size: clamp(14px, 0.5vw + 12px, 18px); line-height: 1.6; }
-.b3 { font-size: clamp(12px, 0.3vw + 10px, 14px); line-height: 1.5; }
+.b1 { font-size: clamp(22px, 0.8vw + 14px, 28px); line-height: 1.25; }
+.b2 { font-size: clamp(20px, 0.5vw + 14px, 24px); line-height: 1.25; }
+.b3 { font-size: clamp(17px, 0.3vw + 13px, 20px); line-height: 1.2; }
 
-/* Sketch-journal page: white paper */
-body {
-  background-color: var(--color-paper);
+.font-pixel { font-family: "Pixelify Sans", monospace; }
+
+/* Classic Mac beveled edges: raised (buttons, windows) and sunken (screens, fields). */
+@utility bevel-out {
+  border: 2px solid var(--color-ink);
+  box-shadow:
+    inset 2px 2px 0 var(--color-white),
+    inset -2px -2px 0 var(--color-grey),
+    4px 4px 0 var(--color-ink);
 }
 
-body {
-  font-size: clamp(14px, 0.5vw + 12px, 18px);
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@utility bevel-in {
+  border: 2px solid var(--color-ink);
+  box-shadow:
+    inset 2px 2px 0 var(--color-grey),
+    inset -2px -2px 0 var(--color-white);
 }
 
-/* Font-family utilities (used across Navigation, ProjectCard, Projects, etc.) */
-.font-permanent-marker { font-family: "Permanent Marker", cursive; }
-.font-share-tech { font-family: "Share Tech Mono", monospace; }
-
-/* Hero "OPEN TO WORK" badge pulse (used on the Home hero, which does not
-   import the component-scoped Hero.css). */
-@keyframes pulse-rotate {
-  0%, 100% { transform: scale(1) rotate(-6deg); }
-  50%      { transform: scale(1.05) rotate(-6deg); }
-}
-.animate-pulse-rotate { animation: pulse-rotate 2s ease-in-out infinite; }
-@media (prefers-reduced-motion: reduce) {
-  .animate-pulse-rotate { animation: none; }
+/* CRT screen: dark green with faint horizontal scanlines */
+@utility crt {
+  background-color: var(--color-forest);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    rgb(0 0 0 / 0.25) 2px,
+    rgb(0 0 0 / 0.25) 3px
+  );
+  color: var(--color-phosphor);
 }
 
-/* Hand-drawn, slightly wobbly box edges (cards, frames, modals). */
-@utility sketch-box {
-  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+/* Classic Mac window title bar: horizontal pinstripes */
+@utility titlebar-stripes {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--color-ink) 0,
+    var(--color-ink) 1px,
+    transparent 1px,
+    transparent 3px
+  );
 }
 
-/* ------------------------------------------------------------
-   Shared component utility: taped-card
-   Used by more than one component (ProjectCard, ModalOverlay),
-   so it stays in the shared global stylesheet.
-   ------------------------------------------------------------ */
-.taped-card {
-  @apply sketch-box;
-  background: white;
-  border: 2px solid black;
-  position: relative;
-  box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
-  transform: rotate(-1deg);
-  transition: all 0.3s ease;
+/* Blinking terminal cursor */
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
 }
+.cursor-blink { animation: blink 1s steps(1) infinite; }
 
-.taped-card::before {
-  content: '';
-  position: absolute;
-  top: -15px;
-  left: 50%;
-  transform: translateX(-50%) rotate(-3deg);
-  width: 80px;
-  height: 25px;
-  background: rgba(255, 170, 0, 0.4);
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  z-index: 10;
+/* Gentle pixel bob (steps keep it chunky) */
+@keyframes pixel-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
 }
-
-.taped-card:hover {
-  transform: rotate(0deg) translateY(-8px);
-  box-shadow: 8px 8px 0 rgba(0,0,0,0.15);
-}
-
-/* ------------------------------------------------------------
-   Global box model + media resets
-   ------------------------------------------------------------ */
-* { box-sizing: border-box; }
-img, canvas, video { max-width: 100%; height: auto; display: block; }
+.animate-pixel-bob { animation: pixel-bob 1.2s steps(2) infinite; }
 
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }

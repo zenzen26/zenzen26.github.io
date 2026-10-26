@@ -60,13 +60,11 @@ export default function StickyAnchor() {
               activeSection === section.id ? 'opacity-100' : 'opacity-40 hover:opacity-70'
             }`}
           >
-            <span className={`font-share-tech text-xs transition-all duration-300 ${
-              activeSection === section.id ? 'translate-x-0 opacity-100 text-amber' : '-translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 text-gray-500'
-            }`}>
+            <span className="b3 transition-all duration-300 -translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 text-beige-light/70">
               {section.label}
             </span>
-            <span className={`w-px h-6 transition-all duration-300 ${
-              activeSection === section.id ? 'bg-amber scale-y-125' : 'bg-gray-400'
+            <span className={`w-1 h-6 transition-all duration-300 ${
+              activeSection === section.id ? 'bg-phosphor scale-y-125' : 'bg-grey'
             }`} />
           </button>
         ))}
