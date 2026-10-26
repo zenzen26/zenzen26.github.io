@@ -68,9 +68,13 @@ export default function MacHero({ projects, experiences }: TermData) {
       )}
 
       {wake && (
-        <Suspense fallback={null}>
-          <Mac3D className="absolute inset-0" projects={projects} experiences={experiences} onReady={() => setReady(true)} />
-        </Suspense>
+        // the 3D root sizes itself with size-full inside an absolutely positioned box (it must not be "absolute"
+        // itself: it is "relative" for its overlays, and a zero-height canvas box never starts the renderer)
+        <div className="absolute inset-0">
+          <Suspense fallback={null}>
+            <Mac3D className="size-full" projects={projects} experiences={experiences} onReady={() => setReady(true)} />
+          </Suspense>
+        </div>
       )}
 
       {wake && !ready && (
