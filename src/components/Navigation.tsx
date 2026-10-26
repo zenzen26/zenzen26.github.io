@@ -50,16 +50,17 @@ export default function Navigation() {
 
   return (
     <nav className="fixed top-0 inset-x-0 z-50 bg-beige-light text-ink border-b-2 border-ink shadow-[0_2px_0_var(--color-ink)]">
-      <div className="max-w-[1920px] mx-auto px-3 sm:px-6 lg:px-8 flex items-center justify-between h-12">
-        <div className="flex items-center gap-2">
+      <div className="max-w-[1920px] mx-auto px-3 sm:px-6 lg:px-8 grid grid-cols-[1fr_auto_1fr] items-center h-12">
+        <div className="flex items-center">
           <Link to="/" className="flex items-center gap-2 pr-3">
             <img src="/favicon.png" alt="" className="size-9 object-contain" />
             <span className="font-pixel text-xl">ZENZEN</span>
           </Link>
-          <div className="hidden lg:flex items-center">{navLinks.map((link) => renderLink(link))}</div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="hidden lg:flex items-center justify-center">{navLinks.map((link) => renderLink(link))}</div>
+
+        <div className="col-start-3 flex items-center justify-end gap-3">
           <span className="b2 hidden sm:inline">{time}</span>
           <button
             className="lg:hidden p-1 cursor-pointer"

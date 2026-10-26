@@ -26,7 +26,7 @@ export default function FooterResume() {
   };
 
   return (
-    <footer id="footer" className="crt py-16 sm:py-20">
+    <footer id="footer" className="bg-black text-phosphor py-16 sm:py-20">
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 4xl:px-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 mb-12">
           <div>

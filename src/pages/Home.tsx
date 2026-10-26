@@ -1,13 +1,15 @@
 import { useEffect, useRef, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { GraduationCap, Mail, Globe, ShieldCheck } from 'lucide-react';
+import { GraduationCap, Mail, Globe, ShieldCheck, RotateCcw } from 'lucide-react';
 import FeaturedProjects from '@/components/FeaturedProjects';
 import IndustriesTech from '@/components/IndustriesTech';
 import StickyExperience from '@/components/StickyExperience';
 import FooterResume from '@/components/FooterResume';
 import StickyAnchor from '@/components/StickyAnchor';
 import HeroHelp from '@/components/HeroHelp';
+import HeroIntro from '@/components/HeroIntro';
+import { resetView } from '@/lib/viewReset';
 import Container from '@/components/ui/Container';
 import MacWindow from '@/components/ui/MacWindow';
 import PageLoader from '@/components/ui/PageLoader';
@@ -25,8 +27,6 @@ const personalDetails = {
   education: 'Bachelor of Computing Science (First Class Honours)',
   contact: ['+61 450 190 503', 'thamzien@gmail.com'],
 };
-
-const heroTech = ['React', 'TypeScript', 'Docker', 'n8n', 'PHP'];
 
 const scrollTo = (selector: string) => document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth' });
 
@@ -62,34 +62,26 @@ export default function Home() {
           </Suspense>
         </div>
 
-        {/* Wide screens: controls cheat-sheet to the left of the Mac */}
+        <button
+          type="button"
+          onClick={resetView}
+          className="bevel-out absolute right-4 top-16 z-20 flex items-center gap-2 bg-beige text-ink px-3 py-1 b2 cursor-pointer hover:bg-ink hover:text-beige-light"
+        >
+          <RotateCcw size={16} /> Reset view
+        </button>
+
+        {/* Wide screens: cheat-sheet left, About right; smaller screens stack them under the Mac */}
         <div className="hidden xl:block absolute left-8 top-1/2 -translate-y-1/2 z-10 w-72">
           <HeroHelp />
         </div>
-        <Container className="xl:hidden mt-6">
-          <HeroHelp />
-        </Container>
-
-        {/* Phones: the on-screen text is tiny, so repeat the intro as a readable window */}
-        <Container className="md:hidden mt-6">
-          <MacWindow title="Welcome.txt" bodyClassName="p-5">
-            <div className="inline-flex items-center gap-2 bg-phosphor border-2 border-ink px-3 mb-4 b2">
-              <span className="size-3 bg-ink animate-pixel-bob" /> OPEN TO WORK
-            </div>
-            <p className="b1 text-moss mb-2">Web Developer &amp; Server Engineer</p>
-            <p className="b1 text-ink/80 mb-5">
-              Full-stack web development, server management, and AI workflow automation with n8n. I build and ship reliable systems end to end.
-            </p>
-            <div className="flex flex-col gap-3 mb-5">
-              <button onClick={() => scrollTo('#projects')} className="bevel-out px-6 py-2 bg-moss text-white b2 cursor-pointer hover:bg-ink">View Projects</button>
-              <button onClick={() => scrollTo('#footer')} className="bevel-out px-6 py-2 bg-beige b2 cursor-pointer hover:bg-ink hover:text-white">Contact Me</button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {heroTech.map((tech) => (
-                <span key={tech} className="b3 px-2 bg-beige border-2 border-ink">{tech}</span>
-              ))}
-            </div>
-          </MacWindow>
+        <div className="hidden xl:block absolute right-8 top-1/2 -translate-y-1/2 z-10 w-80">
+          <HeroIntro />
+        </div>
+        <Container className="xl:hidden mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+          <HeroIntro />
+          <div className="hidden md:block">
+            <HeroHelp />
+          </div>
         </Container>
       </section>
 

@@ -1,3 +1,10 @@
+import { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { Draggable } from 'gsap/Draggable';
+import { RESET_VIEW_EVENT } from '@/lib/viewReset';
+
+gsap.registerPlugin(Draggable);
+
 interface MacWindowProps {
   title: string;
   children: React.ReactNode;
@@ -5,6 +12,8 @@ interface MacWindowProps {
   onClose?: () => void;
   /** Animate in/out on scroll (see useWindowReveal). */
   reveal?: boolean;
+  /** Drag by the title bar on wide screens (xl+); returns home on "Reset view". */
+  draggable?: boolean;
   className?: string;
   bodyClassName?: string;
 }
@@ -15,15 +24,53 @@ export default function MacWindow({
   children,
   onClose,
   reveal = false,
+  draggable = false,
   className = '',
   bodyClassName = '',
 }: MacWindowProps) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const barRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const root = rootRef.current;
+    const bar = barRef.current;
+    if (!draggable || !root || !bar) return;
+
+    const wide = window.matchMedia('(min-width: 1280px)');
+    let drag: Draggable | undefined;
+
+    // Stacked layouts (below xl) keep windows in the page flow, so dragging only exists on wide screens.
+    const sync = () => {
+      drag?.kill();
+      drag = undefined;
+      gsap.set(root, { x: 0, y: 0 });
+      if (wide.matches) {
+        drag = Draggable.create(root, {
+          type: 'x,y',
+          trigger: bar,
+          bounds: document.getElementById('hero') ?? undefined,
+        })[0];
+      }
+    };
+    const home = () => { gsap.to(root, { x: 0, y: 0, duration: 0.5, ease: 'back.out(1.4)' }); };
+
+    sync();
+    wide.addEventListener('change', sync);
+    window.addEventListener(RESET_VIEW_EVENT, home);
+    return () => {
+      drag?.kill();
+      wide.removeEventListener('change', sync);
+      window.removeEventListener(RESET_VIEW_EVENT, home);
+    };
+  }, [draggable]);
+
   return (
     <div
+      ref={rootRef}
       data-win={reveal ? '' : undefined}
       className={`bevel-out bg-beige-light text-ink flex flex-col min-w-0 ${className}`}
     >
-      <div className="flex items-center gap-2 border-b-2 border-ink bg-beige px-2 py-1">
+      <div ref={barRef} className={`flex items-center gap-2 border-b-2 border-ink bg-beige px-2 py-1 ${draggable ? 'xl:cursor-grab xl:active:cursor-grabbing select-none' : ''}`}>
         {onClose ? (
           <button
             type="button"

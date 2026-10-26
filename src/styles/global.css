@@ -44,6 +44,9 @@
   --color-moss: #2f6f46;
   --color-phosphor: #55f28b;
   --color-ink: #0b0b0b;
+  /* Calico pet */
+  --color-calico: #e8903a;
+  --color-blush: #f2a0b0;
   --color-black: #000000;
   --color-white: #ffffff;
   --font-pixel: "Pixelify Sans", monospace;
@@ -53,9 +56,9 @@
 
 /* Read from JS (three.js) only, so `static` keeps them from being tree-shaken. */
 @theme static {
-  /* Yellowed (aged) plastic for the 3D Mac case */
-  --color-plastic: #e3d6a2;
-  --color-plastic-dark: #bfb07c;
+  /* Apple "Platinum" beige plastic for the 3D Mac case */
+  --color-plastic: #d5cdb5;
+  --color-plastic-dark: #b4ab91;
 }
 
 html, body {
@@ -132,6 +135,12 @@ body, .b1, .b2, .b3, p, span, div, a, button, input, textarea, select, label {
     rgb(0 0 0 / 0.25) 3px
   );
   color: var(--color-phosphor);
+}
+
+/* 1px black outline around a pixel sprite so it reads on any background */
+@utility pixel-outline {
+  filter: drop-shadow(2px 0 0 var(--color-ink)) drop-shadow(-2px 0 0 var(--color-ink))
+    drop-shadow(0 2px 0 var(--color-ink)) drop-shadow(0 -2px 0 var(--color-ink));
 }
 
 /* Classic Mac window title bar: horizontal pinstripes */

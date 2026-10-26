@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useRef, useState, type MutableRefObject, type PointerEvent as ReactPointerEvent } from 'react';
 import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
-import { ContactShadows, RoundedBox, useCursor } from '@react-three/drei';
+import { RoundedBox, useCursor } from '@react-three/drei';
 import { CanvasTexture, CatmullRomCurve3, Color, NearestFilter, Vector3, type Group, type Mesh } from 'three';
 import { gsap } from 'gsap';
 import PixelCat from '@/components/ui/PixelCat';
 import { PIXEL_CAT_GRID, themeColor } from '@/lib/pixelCat';
+import { RESET_VIEW_EVENT } from '@/lib/viewReset';
 
-/** Rotation limit on each axis (±60°); resting poses snap to 30° steps. */
-const LIMIT = (60 * Math.PI) / 180;
-const SNAP_STEP = (30 * Math.PI) / 180;
+/** Rotation limit on each axis (±25°); resting poses snap to 12.5° steps. */
+const LIMIT = (25 * Math.PI) / 180;
+const SNAP_STEP = (12.5 * Math.PI) / 180;
 const IDLE_RETURN_MS = 5000;
 const BOOT_MS = 1600;
 const BRIGHTNESS = [0.55, 0.8, 1];
@@ -179,6 +180,27 @@ function useScreen(ui: MutableRefObject<ScreenState>) {
   }, [canvas, texture, ui]);
 
   return { canvas, texture };
+}
+
+/** Soft blob shadow that lives in the model's frame, so it never slices through the case when tilted. */
+function ShadowBlob() {
+  const texture = useMemo(() => {
+    const c = document.createElement('canvas');
+    c.width = c.height = 256;
+    const g = c.getContext('2d')!;
+    const gradient = g.createRadialGradient(128, 128, 10, 128, 128, 128);
+    gradient.addColorStop(0, 'rgba(0,0,0,0.55)');
+    gradient.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = gradient;
+    g.fillRect(0, 0, 256, 256);
+    return new CanvasTexture(c);
+  }, []);
+  return (
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0.5, -1.352, 0.7]} renderOrder={-1}>
+      <planeGeometry args={[8.5, 6.5]} />
+      <meshBasicMaterial map={texture} transparent depthWrite={false} toneMapped={false} />
+    </mesh>
+  );
 }
 
 /** A wire as a thin tube along a smooth curve. */
@@ -363,6 +385,7 @@ function MacModel() {
 
   return (
     <group>
+      <ShadowBlob />
       {/* case: squarer CRT body + rear hump */}
       <RoundedBox args={[2.9, 2.7, 2.4]} radius={0.04} smoothness={2}>
         <meshStandardMaterial color={beige} roughness={0.7} />
@@ -478,7 +501,9 @@ function Rig({ rot, dragging }: { rot: MutableRefObject<Rotation>; dragging: Mut
   const camera = useThree((s) => s.camera);
   // Pull the camera back on narrow screens so the keyboard and mouse never get cropped.
   useEffect(() => {
-    camera.position.set(0, 0.4, Math.max(9.4, 12.5 / aspect));
+    // Portrait phones: fill the width with the screen (case sides may crop); landscape: fit the whole desk.
+    const z = aspect < 1 ? Math.max(7.2, 2.9 / (0.573 * aspect)) : Math.max(9.4, 12.5 / aspect);
+    camera.position.set(0, 0.4, z);
     camera.lookAt(0, -0.1, 0);
   }, [camera, aspect]);
   useFrame(({ clock }) => {
@@ -501,7 +526,7 @@ const hasWebGL = () => {
   }
 };
 
-/** Draggable 3D Macintosh: rotates up to ±60° per axis, snaps to 30° poses on release. */
+/** Draggable 3D Macintosh: rotates up to ±25° per axis, snaps to 12.5° poses on release. */
 export default function Mac3D({ className = '' }: { className?: string }) {
   const rot = useRef<Rotation>({ x: 0, y: 0 });
   const dragging = useRef(false);
@@ -513,6 +538,15 @@ export default function Mac3D({ className = '' }: { className?: string }) {
 
   const settle = (x: number, y: number, duration: number) =>
     gsap.to(rot.current, { x, y, duration, ease: 'back.out(1.6)', overwrite: true });
+
+  useEffect(() => {
+    const home = () => {
+      window.clearTimeout(idleTimer.current);
+      settle(0, 0, 0.6);
+    };
+    window.addEventListener(RESET_VIEW_EVENT, home);
+    return () => window.removeEventListener(RESET_VIEW_EVENT, home);
+  }, []);
 
   // Window-level listeners so r3f still receives its own click events on the canvas.
   const onDown = (e: ReactPointerEvent<HTMLDivElement>) => {
@@ -562,9 +596,8 @@ export default function Mac3D({ className = '' }: { className?: string }) {
         <directionalLight position={[4, 6, 5]} intensity={1.5} />
         <directionalLight position={[-5, 2, -3]} intensity={0.6} />
         <Rig rot={rot} dragging={dragging} />
-        <ContactShadows position={[0, -1.36, 0]} opacity={0.5} scale={11} blur={2.5} far={4} />
       </Canvas>
-      <p className="b3 absolute top-1 inset-x-0 text-center text-beige-light/70 pointer-events-none">
+      <p className="b3 hidden sm:block absolute top-1 inset-x-0 text-center text-beige-light/70 pointer-events-none">
         <span className="cursor-blink">▮</span> drag to rotate · press the buttons &amp; keys
       </p>
     </div>

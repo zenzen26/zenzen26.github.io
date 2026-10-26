@@ -3,18 +3,18 @@ import { gsap } from 'gsap';
 import PixelSprite from '@/components/ui/PixelSprite';
 import { PET_FRAMES, type PetPose } from '@/lib/petCat';
 
-const SPEED = 70; // px per second
+const SPEED = 60; // px per second
 const SCALE = 4;
 
-/** Pixel cat that wanders along the bottom of the screen, naps, and meows when clicked. */
+/** Chubby side-view calico that waddles along the bottom of the screen, blinks, and meows when clicked. */
 export default function DesktopPet() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLButtonElement>(null);
-  const [pose, setPose] = useState<PetPose>('sit');
-  const [facing, setFacing] = useState<1 | -1>(1);
   const [walking, setWalking] = useState(false);
-  const [bubble, setBubble] = useState(false);
+  const [facing, setFacing] = useState<1 | -1>(1);
   const [step, setStep] = useState(false);
+  const [blink, setBlink] = useState(false);
+  const [bubble, setBubble] = useState(false);
 
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -36,7 +36,6 @@ export default function DesktopPet() {
         ease: 'none',
         onComplete: () => {
           setWalking(false);
-          setPose('sit');
           timer = window.setTimeout(wander, gsap.utils.random(2500, 6000));
         },
       });
@@ -49,10 +48,20 @@ export default function DesktopPet() {
     };
   }, []);
 
-  // Alternate the two walk frames while moving
+  // Alternate the walk frames (and a little hop) while moving
   useEffect(() => {
     if (!walking) return;
-    const id = window.setInterval(() => setStep((s) => !s), 200);
+    const id = window.setInterval(() => setStep((s) => !s), 220);
+    return () => window.clearInterval(id);
+  }, [walking]);
+
+  // Blink now and then while sitting
+  useEffect(() => {
+    if (walking) return;
+    const id = window.setInterval(() => {
+      setBlink(true);
+      window.setTimeout(() => setBlink(false), 180);
+    }, 2600);
     return () => window.clearInterval(id);
   }, [walking]);
 
@@ -64,10 +73,10 @@ export default function DesktopPet() {
     }
   };
 
-  const frame: PetPose = walking ? (step ? 'walkA' : 'walkB') : pose;
+  const pose: PetPose = walking ? (step ? 'walkA' : 'walkB') : blink ? 'blink' : 'idle';
 
   return (
-    <div ref={wrapRef} className="fixed bottom-0 left-0 z-[55] pointer-events-none">
+    <div ref={wrapRef} className="fixed bottom-1 left-0 z-[55] pointer-events-none">
       {bubble && (
         <span className="absolute -top-9 left-1/2 -translate-x-1/2 b3 bg-beige-light text-ink border-2 border-ink px-2 whitespace-nowrap">
           mrrp!
@@ -76,11 +85,11 @@ export default function DesktopPet() {
       <button
         ref={bodyRef}
         type="button"
-        aria-label="Pet the cat"
+        aria-label="Pet the calico cat"
         onClick={meow}
-        className={`pointer-events-auto cursor-pointer block ${facing === -1 ? '-scale-x-100' : ''}`}
+        className={`pointer-events-auto cursor-pointer block ${facing === -1 ? '-scale-x-100' : ''} ${walking && step ? '-translate-y-1' : ''}`}
       >
-        <PixelSprite grid={PET_FRAMES[frame]} scale={SCALE} />
+        <PixelSprite grid={PET_FRAMES[pose]} scale={SCALE} className="pixel-outline" />
       </button>
     </div>
   );

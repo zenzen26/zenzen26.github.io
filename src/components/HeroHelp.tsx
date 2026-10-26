@@ -13,7 +13,7 @@ const CONTROLS = [
 /** "How to use this Mac" cheat-sheet shown beside (xl) or under (smaller) the 3D hero. */
 export default function HeroHelp({ className = '' }: { className?: string }) {
   return (
-    <MacWindow title="Help.txt" className={className} bodyClassName="p-4">
+    <MacWindow title="Help.txt" draggable className={className} bodyClassName="p-4">
       <p className="b2 mb-3">This Mac is interactive. Try it:</p>
       <ul className="space-y-2">
         {CONTROLS.map(({ icon: Icon, label, text }) => (
