@@ -53,7 +53,7 @@ export const pathOf = (cwd: Dir) => (cwd === '~' ? '~' : `~/${cwd}`);
 const USER_KEY = 'zen-user';
 const USER_MAX = 16;
 /** Names visitors may not log in as. */
-const RESERVED = ['admin', 'administrator', 'root', 'zen', 'zenzen'];
+const RESERVED = ['admin', 'administrator', 'root', 'zen', 'zenzen', 'zenzen26'];
 const isReserved = (name: string) => RESERVED.includes(name.toLowerCase());
 
 export function getUser(): string {
