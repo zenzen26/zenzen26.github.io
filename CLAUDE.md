@@ -1,7 +1,9 @@
 # Claude rules — zenzen-portfolio
 
 Instructions Claude reads automatically when working in this repo
-(React 19 + TypeScript + Vite + Tailwind v4 + GSAP + lucide-react).
+(React 19 + TypeScript + Vite + Tailwind v4 + GSAP + three.js via
+@react-three/fiber + lucide-react). Theme: **"Zen OS"** — a vintage Macintosh
+desktop (beige, grey, dark/phosphor green, ink) with a pixel-art cat.
 
 ## Rule #1 — Reuse before you create (applies to everything below)
 
@@ -30,12 +32,19 @@ component, file, or helper unless you have to.
 ## Conventions
 
 - **Theme tokens, not raw values**: colours/fonts live in the `@theme` block
-  of `src/styles/global.css` (`amber`, `green`, `red`, `paper`, …). Use
-  `bg-amber`, `fill-black`, `text-black/70` — never `#hex` in markup.
+  of `src/styles/global.css` (`beige`, `beige-light`, `grey`, `forest`, `moss`,
+  `phosphor`, `ink`). Use `bg-beige`, `fill-ink`, `text-ink/70` — never `#hex`
+  in markup. Canvas/three code reads tokens via `themeColor()` in
+  `src/lib/pixelCat.ts`.
 - **Where CSS goes**: shared (used by 2+ components) → `global.css`; used by
   one component → co-located `Component.css`.
-- **Typography**: headings use `h1–h4`, body uses `b1–b3` (see `global.css`).
-  Don't add inline font-size utilities for these.
+- **Typography**: pixel headings `h1–h4` (Pixelify Sans) and terminal body
+  `b1–b3` (VT323), see `global.css`. Don't add inline font-size utilities.
+- **Reusable bases** (extend these, don't fork): `MacWindow` (every panel and
+  modal), `FloppyIcon` (projects, resume downloads), `PixelCat` (+ `lib/pixelCat.ts`
+  sprite data), `ModalOverlay`, `TechStack`, `TypeBadge`; utilities `bevel-out`,
+  `bevel-in`, `crt`, `titlebar-stripes`; hook `useWindowReveal` (scroll
+  entrance/exit for any `MacWindow reveal`).
 - **Path alias**: import with `@/…`.
 - **Animation**: GSAP, created inside `gsap.context()` and reverted on
   cleanup; honour `prefers-reduced-motion`.

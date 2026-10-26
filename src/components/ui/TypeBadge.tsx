@@ -7,9 +7,9 @@ interface TypeBadgeProps {
 }
 
 export default function TypeBadge({ type, withIcon, className = '' }: TypeBadgeProps) {
-  const bg = typeColorMap[type] ?? 'bg-black';
+  const color = typeColorMap[type] ?? 'bg-ink text-white';
   return (
-    <span className={`${bg} b3 px-2 py-1 text-white flex items-center gap-1 ${className}`}>
+    <span className={`${color} b3 px-2 border-2 border-ink flex items-center gap-1 ${className}`}>
       {withIcon}
       {type}
     </span>

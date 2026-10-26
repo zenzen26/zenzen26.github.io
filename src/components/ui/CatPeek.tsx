@@ -58,9 +58,9 @@ function CatPeekRun() {
         {/* head: half-ellipse spanning the middle 70% of the width; outer 15% each side is paw area */}
         <path d="M150 260 V200 A350 190 0 0 1 850 200 V260 Z" />
 
-        {/* eyes: amber, pupils slide left/right */}
-        <ellipse cx="395" cy="120" rx="32" ry="34" className="fill-amber" />
-        <ellipse cx="605" cy="120" rx="32" ry="34" className="fill-amber" />
+        {/* eyes: phosphor, pupils slide left/right */}
+        <ellipse cx="395" cy="120" rx="32" ry="34" className="fill-phosphor" />
+        <ellipse cx="605" cy="120" rx="32" ry="34" className="fill-phosphor" />
         <g data-cat="pupil">
           <ellipse cx="395" cy="120" rx="9" ry="25" className="fill-black" />
           <circle cx="390" cy="109" r="4.5" className="fill-white" />
@@ -71,7 +71,7 @@ function CatPeekRun() {
         </g>
 
         {/* nose, "ω" mouth, whiskers */}
-        <polygon points="488,138 512,138 500,152" className="fill-red/70" />
+        <polygon points="488,138 512,138 500,152" className="fill-grey" />
         <path
           d="M500 152 v8 M500 160 q-14 16 -28 4 M500 160 q14 16 28 4"
           className="fill-none stroke-white/70"

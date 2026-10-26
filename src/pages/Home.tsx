@@ -1,18 +1,22 @@
-import { useEffect } from 'react';
-import { gsap } from 'gsap';
+import { useEffect, useRef, lazy, Suspense } from 'react';
+import { Link } from 'react-router-dom';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { GraduationCap, Mail, Globe, ShieldCheck, PawPrint } from 'lucide-react';
+import { GraduationCap, Mail, Globe, ShieldCheck } from 'lucide-react';
 import FeaturedProjects from '@/components/FeaturedProjects';
 import IndustriesTech from '@/components/IndustriesTech';
 import StickyExperience from '@/components/StickyExperience';
-import PageLoader from '@/components/ui/PageLoader';
 import FooterResume from '@/components/FooterResume';
 import StickyAnchor from '@/components/StickyAnchor';
 import Container from '@/components/ui/Container';
+import MacWindow from '@/components/ui/MacWindow';
+import PageLoader from '@/components/ui/PageLoader';
+import PixelCat from '@/components/ui/PixelCat';
 import { useCSVData } from '@/hooks/useCSVData';
+import { useWindowReveal } from '@/hooks/useWindowReveal';
 import type { Project, Experience } from '@/types';
 
-gsap.registerPlugin(ScrollTrigger);
+// three.js is heavy: load the 3D Mac only for the Home hero.
+const Mac3D = lazy(() => import('@/components/Mac3D'));
 
 const personalDetails = {
   languages: ['English (Native)', 'Mandarin (Native)'],
@@ -21,136 +25,115 @@ const personalDetails = {
   contact: ['+61 450 190 503', 'thamzien@gmail.com'],
 };
 
+const heroTech = ['React', 'TypeScript', 'Docker', 'n8n', 'PHP'];
+
+const scrollTo = (selector: string) => document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth' });
+
 export default function Home() {
   const { data: projects, loading: projectsLoading } = useCSVData<Project>('/data/projects.csv');
   const { data: experiences, loading: expLoading } = useCSVData<Experience>('/data/experience.csv');
+  const pageRef = useRef<HTMLDivElement>(null);
+  const loaded = !projectsLoading && !expLoading;
+
+  useWindowReveal(pageRef, [loaded]);
 
   useEffect(() => {
-    if (!projectsLoading && !expLoading) {
-      ScrollTrigger.refresh();
-    }
-  }, [projectsLoading, expLoading]);
+    if (loaded) ScrollTrigger.refresh();
+  }, [loaded]);
 
-  if (projectsLoading || expLoading) {
-    return <PageLoader withNavOffset={false} />;
-  }
+  if (!loaded) return <PageLoader withNavOffset={false} />;
 
   const featuredProjects = projects
-    .filter(p => p.featured)
+    .filter((p) => p.featured)
     .sort((a, b) => (b.date || '').localeCompare(a.date || ''))
     .slice(0, 6);
 
   return (
-    <div className="relative">
+    <div ref={pageRef} className="relative">
       <StickyAnchor />
 
-      {/* Hero — photo in amber frame (replaces the former Spline crystal) */}
-      <section id="hero" className="min-h-screen pt-20 lg:pt-0 flex items-center overflow-hidden">
-        <div className="max-w-[1920px] mx-auto w-full px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 4xl:px-24">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center min-h-[calc(100vh-5rem)] lg:min-h-screen">
-
-            {/* Photo */}
-            <div className="lg:col-span-6 relative order-2 lg:order-1">
-              <div className="relative">
-                <div className="bg-amber aspect-[4/5] max-w-md mx-auto relative overflow-hidden border-4 border-black sketch-box shadow-2xl transform -rotate-2">
-                  <div className="absolute inset-0 bg-gradient-to-br from-amber to-[#FF8800]" />
-                  <img src="/images/cat.webp" alt="Zenzen" className="absolute inset-0 w-full h-full object-cover" />
-                  <div className="absolute bottom-0 left-0 right-0 bg-white p-6 text-center">
-                    <p className="b2 text-black/60">zenzen @ 2024</p>
-                    <p className="b3 text-black/40 mt-1">Sydney, NSW</p>
-                  </div>
-                </div>
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-32 h-8 bg-amber/30 transform rotate-2" />
-              </div>
+      {/* Hero — welcome window | draggable 3D Mac | status window */}
+      <section id="hero" className="min-h-screen pt-20 pb-10 flex items-center">
+        <Container className="w-full lg:pr-20">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
+            <div className="lg:col-span-4 order-2 lg:order-1">
+              <MacWindow title="Welcome.txt" reveal bodyClassName="p-6">
+                <h1 className="h1 mb-3">ZEN<span className="text-moss">ZEN</span></h1>
+                <p className="b1 text-moss mb-4">Web Developer &amp; Server Engineer</p>
+                <p className="b1 text-ink/80">
+                  Full-stack web development, server management, and AI workflow automation with n8n. I build and ship
+                  reliable systems end to end, combining technology, design, and creativity to deliver engaging digital experiences.
+                </p>
+              </MacWindow>
             </div>
 
-            {/* Intro copy */}
-            <div className="lg:col-span-6 xl:pl-10 order-1 lg:order-2">
-              <div className="inline-block mb-6 animate-pulse-rotate">
-                <div className="bg-green text-white b2 px-4 py-2 border-4 border-green border-dashed">
-                  OPEN TO WORK
+            <div className="lg:col-span-4 order-1 lg:order-2 h-[52vh] lg:h-[68vh]">
+              <Suspense fallback={<div className="size-full flex items-center justify-center"><PixelCat scale={10} className="animate-pixel-bob" /></div>}>
+                <Mac3D className="size-full" />
+              </Suspense>
+            </div>
+
+            <div className="lg:col-span-4 order-3">
+              <MacWindow title="Status" reveal bodyClassName="p-6">
+                <div className="inline-flex items-center gap-2 bg-phosphor border-2 border-ink px-3 mb-5 b2">
+                  <span className="size-3 bg-ink animate-pixel-bob" /> OPEN TO WORK
                 </div>
-              </div>
-
-              <h1 className="h1 leading-none mb-4 text-shadow-retro">
-                ZEN<span className="text-amber">ZEN</span>
-              </h1>
-
-              <p className="b1 text-amber mb-6">
-                Web Developer & Server Engineer
-              </p>
-
-              <p className="b1 text-black/80 max-w-md mb-8 leading-relaxed">
-                Full-stack web development, server management, and AI workflow automation with n8n. I build and ship reliable systems end to end, combining technology, design, and creativity to deliver engaging digital experiences.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4 mb-12">
-                <button
-                  onClick={() => document.querySelector('#projects')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="group relative px-8 py-4 bg-red text-white b2 overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1 hover:cursor-pointer"
-                >
-                  <span className="relative z-10">View Projects</span>
-                  <div className="absolute inset-0 bg-black transform translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                </button>
-
-                <button
-                  onClick={() => document.querySelector('#footer')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="px-8 py-4 border-2 border-amber text-black b2 hover:bg-amber hover:text-black transition-all hover:-translate-y-1 hover:cursor-pointer"
-                >
-                  Contact Me
-                </button>
-              </div>
-
-              <div className="flex flex-wrap gap-2 b3">
-                {['React', 'TypeScript', 'Docker', 'n8n', 'PHP'].map((tech) => (
-                  <span
-                    key={tech}
-                    className="px-3 py-1 bg-black/5 border border-black/10 hover:bg-amber/20 hover:border-amber transition-colors cursor-default"
-                  >
-                    {tech}
-                  </span>
-                ))}
-              </div>
+                <div className="flex flex-col sm:flex-row gap-3 mb-6">
+                  <button onClick={() => scrollTo('#projects')} className="bevel-out px-6 py-2 bg-moss text-white b2 cursor-pointer hover:bg-ink">
+                    View Projects
+                  </button>
+                  <button onClick={() => scrollTo('#footer')} className="bevel-out px-6 py-2 bg-beige b2 cursor-pointer hover:bg-ink hover:text-white">
+                    Contact Me
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {heroTech.map((tech) => (
+                    <span key={tech} className="b3 px-2 bg-beige border-2 border-ink">{tech}</span>
+                  ))}
+                </div>
+              </MacWindow>
             </div>
           </div>
-        </div>
+        </Container>
       </section>
 
-      <section id="projects" className="py-20 bg-amber/10">
-        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 4xl:px-24">
-          <div className="mb-10 text-center">
-            <h2 className="h2 inline-flex items-center gap-3">
-              <PawPrint className="text-amber" size={36} /> Featured <span className="text-amber">Projects</span>
-            </h2>
-          </div>
-          <FeaturedProjects projects={featuredProjects} />
-        </div>
+      <section id="projects" className="py-20 crt">
+        <Container>
+          <MacWindow title="Macintosh HD — Featured Projects" reveal className="text-ink" bodyClassName="p-6 sm:p-10">
+            <FeaturedProjects projects={featuredProjects} />
+            <div className="mt-10 text-center">
+              <Link to="/projects" className="bevel-out inline-block px-6 py-2 bg-beige b2 hover:bg-ink hover:text-white">
+                Open all projects →
+              </Link>
+            </div>
+          </MacWindow>
+        </Container>
       </section>
 
       <IndustriesTech />
 
-      {/* Personal Details (moved from the former About page, placed below Tech Stack) */}
-      <section className="py-16 sm:py-20 bg-green/10">
+      <section className="py-16 sm:py-20 bg-grey/30">
         <Container>
-          <h2 className="h3 mb-8 flex items-center gap-3"><PawPrint className="text-amber" size={32} /> Personal Details</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { icon: <Globe size={24} className="text-green" />, title: 'Languages', items: personalDetails.languages },
-              { icon: <ShieldCheck size={24} className="text-amber" />, title: 'Certificates & Licenses', items: personalDetails.certificates },
-              { icon: <GraduationCap size={24} className="text-red" />, title: 'Education', items: [personalDetails.education] },
-              { icon: <Mail size={24} className="text-black" />, title: 'Contact', items: personalDetails.contact },
-            ].map(({ icon, title, items }) => (
-              <div key={title} className="border-2 border-black p-6 bg-white sketch-box">
-                <div className="flex items-center gap-5 mb-3">
-                  {icon}
-                  <h4 className="h4">{title}</h4>
+          <MacWindow title="ReadMe — Personal Details" reveal bodyClassName="p-6 sm:p-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { icon: <Globe size={24} />, title: 'Languages', items: personalDetails.languages },
+                { icon: <ShieldCheck size={24} />, title: 'Certificates & Licenses', items: personalDetails.certificates },
+                { icon: <GraduationCap size={24} />, title: 'Education', items: [personalDetails.education] },
+                { icon: <Mail size={24} />, title: 'Contact', items: personalDetails.contact },
+              ].map(({ icon, title, items }) => (
+                <div key={title} className="bevel-in bg-white p-5">
+                  <div className="flex items-center gap-3 mb-3 text-moss">
+                    {icon}
+                    <h4 className="h4 text-ink">{title}</h4>
+                  </div>
+                  <ul className="b2 space-y-1 text-ink/80">
+                    {items.map((item) => <li key={item}>{item}</li>)}
+                  </ul>
                 </div>
-                <ul className="b2 space-y-1 text-black/70">
-                  {items.map((item) => <li key={item}>{item}</li>)}
-                </ul>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </MacWindow>
         </Container>
       </section>
 

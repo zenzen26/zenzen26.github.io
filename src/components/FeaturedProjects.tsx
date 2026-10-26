@@ -1,63 +1,28 @@
-import { useEffect, useRef, useState } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useState } from 'react';
 import type { Project } from '@/types';
-import ProjectCard from '@/components/ProjectCard';
+import FloppyIcon from '@/components/ui/FloppyIcon';
 import ProjectModal from '@/components/ProjectModal';
-
-gsap.registerPlugin(ScrollTrigger);
+import { floppyToneMap } from '@/lib/colorMaps';
 
 interface FeaturedProjectsProps {
   projects: Project[];
 }
 
+/** Desktop of project floppy disks; clicking one opens its detail window. */
 export default function FeaturedProjects({ projects }: FeaturedProjectsProps) {
-  const sectionRef = useRef<HTMLDivElement>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        '.project-card-desktop',
-        { rotation: -3, y: 60, opacity: 0 },
-        {
-          rotation: 0, y: 0, opacity: 1, duration: 0.6, stagger: 0.15, ease: 'power2.out',
-          scrollTrigger: { trigger: sectionRef.current, start: 'top 75%' },
-        }
-      );
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, [projects]);
 
   return (
     <>
-      {/* Desktop: Grid */}
-      <div ref={sectionRef} className="hidden md:grid md:grid-cols-3 gap-6">
-        {projects.map((project, index) => (
-          <div key={project.id} className="relative group">
-            <ProjectCard
-              project={project}
-              index={index}
-              onClick={() => setSelectedProject(project)}
-              imageHeight="h-48 sm:h-56"
-              techLimit={4}
-              className="project-card-desktop"
-            />
-          </div>
-        ))}
-      </div>
-
-      {/* Mobile: Simple vertical list */}
-      <div className="md:hidden flex flex-col gap-6">
-        {projects.map((project, index) => (
-          <ProjectCard
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-4 gap-y-8 justify-items-center">
+        {projects.map((project) => (
+          <FloppyIcon
             key={project.id}
-            project={project}
-            index={index}
+            label={project.title}
+            caption={project.type}
+            imageUrl={project.image_url}
+            tone={floppyToneMap[project.color_tag] ?? 'ink'}
             onClick={() => setSelectedProject(project)}
-            imageHeight="h-40"
-            techLimit={3}
           />
         ))}
       </div>

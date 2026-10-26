@@ -1,37 +1,40 @@
-import { useEffect } from 'react';
-import { X } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import MacWindow from '@/components/ui/MacWindow';
 
 interface ModalOverlayProps {
+  title: string;
   onClose: () => void;
   children: React.ReactNode;
-  /** Extra classes on the inner white panel */
-  panelClassName?: string;
+  /** Max-width class for the window (default max-w-5xl) */
+  widthClassName?: string;
 }
 
-export default function ModalOverlay({ onClose, children, panelClassName = '' }: ModalOverlayProps) {
+/** Full-screen dimmer + a Mac window that zooms open. Used by project and experience details. */
+export default function ModalOverlay({ title, onClose, children, widthClassName = 'max-w-5xl' }: ModalOverlayProps) {
+  const winRef = useRef<HTMLDivElement>(null);
+
   // Lock body scroll while open
   useEffect(() => {
     document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = 'auto'; };
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
+  useEffect(() => {
+    if (!winRef.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const tween = gsap.fromTo(winRef.current, { scale: 0.7, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35, ease: 'steps(5)' });
+    return () => { tween.kill(); };
   }, []);
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm cursor-pointer"
+      className="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-forest/80 cursor-pointer"
       onClick={onClose}
     >
-      <div
-        className={`bg-white w-full max-w-5xl max-h-[90vh] overflow-y-auto relative taped-card ${panelClassName}`}
-        style={{ transform: 'rotate(0deg)' }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 bg-white/80 hover:bg-amber transition-colors z-10 border-2 border-black"
-        >
-          <X size={24} />
-        </button>
-        {children}
+      <div ref={winRef} className={`w-full ${widthClassName} max-h-[90vh] flex cursor-auto`} onClick={(e) => e.stopPropagation()}>
+        <MacWindow title={title} onClose={onClose} className="w-full" bodyClassName="overflow-y-auto">
+          {children}
+        </MacWindow>
       </div>
     </div>
   );
