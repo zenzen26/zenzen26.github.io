@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState, type MutableRefObject, type PointerEvent as ReactPointerEvent } from 'react';
 import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
-import { RoundedBox, useCursor } from '@react-three/drei';
 import { CanvasTexture, CatmullRomCurve3, Color, NearestFilter, Vector3, type Group, type Mesh } from 'three';
 import { gsap } from 'gsap';
 import PixelCat from '@/components/ui/PixelCat';
+import RoundedBox from '@/components/three/RoundedBox';
+import { useCursor } from '@/hooks/useCursor';
 import { themeColor } from '@/lib/pixelCat';
 import { RESET_VIEW_EVENT } from '@/lib/viewReset';
 import { CAT_EVENT, JOY_EVENT } from '@/lib/catEvent';
@@ -26,7 +27,7 @@ interface Rotation { x: number; y: number }
 const clamp = (v: number, limit: number) => Math.max(-limit, Math.min(limit, v));
 const snap = (v: number, step: number, limit: number) => clamp(Math.round(v / step) * step, limit);
 
-function useScreen(ui: MutableRefObject<ScreenState>) {
+function useScreen(ui: MutableRefObject<ScreenState>, active: boolean) {
   const canvas = useMemo(() => {
     const c = document.createElement('canvas');
     c.width = SCREEN_W;
@@ -54,12 +55,13 @@ function useScreen(ui: MutableRefObject<ScreenState>) {
       document.fonts.load('40px "VT323"'),
       document.fonts.load('700 40px "Pixelify Sans"'),
     ]).finally(redraw);
+    if (!active) return;
     const id = window.setInterval(() => {
       if (++tick % 6 === 0) cursor = !cursor;
       redraw();
     }, 80);
     return () => window.clearInterval(id);
-  }, [canvas, texture, ui]);
+  }, [canvas, texture, ui, active]);
 
   return { canvas, texture };
 }
@@ -261,14 +263,14 @@ function PushButton({ position, size = 0.18, color, glyph, onPress }: { position
   );
 }
 
-function MacModel({ data }: { data: TermData }) {
+function MacModel({ data, active }: { data: TermData; active: boolean }) {
   // mutable screen state shared with the canvas painter (only the first value is kept)
   const ui = useRef<ScreenState>(createScreen());
   const dataRef = useRef(data);
   useEffect(() => {
     dataRef.current = data;
   }, [data]);
-  const { texture } = useScreen(ui);
+  const { texture } = useScreen(ui, active);
   const [power, setPower] = useState(true);
   const [bright, setBright] = useState(2);
   const [screenHover, setScreenHover] = useState(false);
@@ -525,7 +527,7 @@ function MacModel({ data }: { data: TermData }) {
   );
 }
 
-function Rig({ rot, data }: { rot: MutableRefObject<Rotation>; data: TermData }) {
+function Rig({ rot, data, active }: { rot: MutableRefObject<Rotation>; data: TermData; active: boolean }) {
   const group = useRef<Group>(null);
   const aspect = useThree((s) => s.size.width / s.size.height);
   const width = useThree((s) => s.size.width);
@@ -549,7 +551,7 @@ function Rig({ rot, data }: { rot: MutableRefObject<Rotation>; data: TermData })
   });
   return (
     <group ref={group}>
-      <MacModel data={data} />
+      <MacModel data={data} active={active} />
     </group>
   );
 }
@@ -563,13 +565,30 @@ const hasWebGL = () => {
 };
 
 /** Draggable 3D Macintosh: turns ±25° sideways and ±8° up/down, snapping to small poses on release. */
-export default function Mac3D({ className = '', projects, experiences }: { className?: string } & TermData) {
+interface Mac3DProps extends TermData {
+  className?: string;
+  /** Called once the first frame has been rendered (a poster can fade out then). */
+  onReady?: () => void;
+}
+
+export default function Mac3D({ className = '', projects, experiences, onReady }: Mac3DProps) {
   const data = useMemo(() => ({ projects, experiences }), [projects, experiences]);
   const rot = useRef<Rotation>({ x: 0, y: 0 });
   const last = useRef({ x: 0, y: 0 });
   const idleTimer = useRef<number | undefined>(undefined);
   const [webgl] = useState(hasWebGL);
   const [grabbing, setGrabbing] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(true);
+
+  // Don't burn CPU/GPU rendering (or repainting the screen) while the Mac is scrolled out of view.
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => () => { window.clearTimeout(idleTimer.current); gsap.killTweensOf(rot.current); }, []);
 
@@ -623,16 +642,23 @@ export default function Mac3D({ className = '', projects, experiences }: { class
 
   return (
     <div
+      ref={rootRef}
       className={`relative select-none touch-pan-y md:touch-none ${grabbing ? 'cursor-grabbing' : ''} ${className}`}
       onPointerDown={onDown}
       role="img"
       aria-label="Interactive 3D Macintosh showing my portfolio. Drag to rotate; click its buttons, keys and screen."
     >
-      <Canvas camera={{ position: [0, 0.4, 9.4], fov: 32 }} dpr={[1, 1.75]} className="!absolute inset-0">
+      <Canvas
+        camera={{ position: [0, 0.4, 9.4], fov: 32 }}
+        dpr={[1, 1.5]}
+        frameloop={visible ? 'always' : 'never'}
+        onCreated={() => onReady?.()}
+        className="!absolute inset-0"
+      >
         <ambientLight intensity={0.75} />
         <directionalLight position={[4, 6, 5]} intensity={1.5} />
         <directionalLight position={[-5, 2, -3]} intensity={0.6} />
-        <Rig rot={rot} data={data} />
+        <Rig rot={rot} data={data} active={visible} />
       </Canvas>
       {/* hidden field: focusing it raises the on-screen keyboard on phones; keys are read from window keydown */}
       <input

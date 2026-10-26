@@ -11,7 +11,6 @@
     "typecheck": "tsc -p tsconfig.app.json && tsc -p tsconfig.node.json"
   },
   "dependencies": {
-    "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
     "@tailwindcss/vite": "^4.2.1",
     "gifuct-js": "^2.1.2",

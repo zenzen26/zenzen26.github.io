@@ -2,27 +2,44 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.png" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- ... -->
-
-    <!-- Preload self-hosted fonts (WOFF2). @font-face lives in src/styles/global.css -->
-    <link rel="preload" as="font" type="font/woff2" href="/fonts/pixelify-sans-700.woff2" crossorigin>
-    <link rel="preload" as="font" type="font/woff2" href="/fonts/vt323-400.woff2" crossorigin>
+    <meta name="theme-color" content="#10281b" />
 
     <title>Zen's Portfolio</title>
     <meta name="description" content="Portfolio of zenzen - Building digital experiences that bridge creative design and technical precision." />
 
-    <!-- Prevent FOUC -->
-    <style>
-      html {
-        visibility: visible;
-        opacity: 1;
-      }
-    </style>
+    <!-- Self-hosted fonts (WOFF2); the @font-face rules live in src/styles/global.css -->
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/pixelify-sans-700.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/vt323-400.woff2" crossorigin />
+
+    <!-- Hero poster (the largest contentful paint): fetched before any JavaScript runs.
+         One per size class, matching the <picture> in src/components/MacHero.tsx. -->
+    <link rel="preload" as="image" type="image/webp" href="/images/mac-poster-lg.webp" media="(min-width: 1024px)" fetchpriority="high" />
+    <link rel="preload" as="image" type="image/webp" href="/images/mac-poster-md.webp" media="(min-width: 600px) and (max-width: 1023px)" fetchpriority="high" />
+    <link rel="preload" as="image" type="image/webp" href="/images/mac-poster-sm.webp" media="(max-width: 599px)" fetchpriority="high" />
+
+    <!-- Data files read by the page (src/hooks/useCSVData.ts), requested in parallel with the JS bundle -->
+    <link rel="preload" as="fetch" href="/data/projects.csv" crossorigin="anonymous" />
+    <link rel="preload" as="fetch" href="/data/experience.csv" crossorigin="anonymous" />
   </head>
   <body>
+    <!-- Static hero poster: painted straight from the HTML (no JavaScript needed), so it is the page's LCP.
+         It sits behind the React content in the hero's exact spot (see src/components/MacHero.tsx, which
+         fades it out when the 3D Mac is ready). Only the Home route has this hero; other routes drop it. -->
+    <div id="boot" aria-hidden="true" style="position:absolute;z-index:-1;top:0;left:0;right:0;padding-top:3rem;transition:opacity .3s">
+      <div style="height:max(520px,calc(100svh - 4rem))">
+        <picture>
+          <source media="(min-width: 1024px)" srcset="/images/mac-poster-lg.webp" type="image/webp" />
+          <source media="(min-width: 600px)" srcset="/images/mac-poster-md.webp" type="image/webp" />
+          <img src="/images/mac-poster-sm.webp" alt="" width="390" height="780" fetchpriority="high" decoding="async" style="width:100%;height:100%;object-fit:contain" />
+        </picture>
+      </div>
+    </div>
     <div id="root"></div>
+    <script>
+      if (location.pathname !== '/') document.getElementById('boot').remove();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
