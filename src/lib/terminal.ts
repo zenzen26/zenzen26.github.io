@@ -52,10 +52,14 @@ export const pathOf = (cwd: Dir) => (cwd === '~' ? '~' : `~/${cwd}`);
 // Browsers do not expose the visitor's account name, so they tell the Mac with `login <name>`.
 const USER_KEY = 'zen-user';
 const USER_MAX = 16;
+/** Names visitors may not log in as. */
+const RESERVED = ['admin', 'administrator', 'root', 'zen', 'zenzen'];
+const isReserved = (name: string) => RESERVED.includes(name.toLowerCase());
 
 export function getUser(): string {
   try {
-    return localStorage.getItem(USER_KEY) || 'guest';
+    const stored = localStorage.getItem(USER_KEY);
+    return stored && !isReserved(stored) ? stored : 'guest';
   } catch {
     return 'guest';
   }
@@ -283,6 +287,7 @@ export function runTerminal(raw: string, cwd: Dir, data: TermData): TermResult {
     case 'su': {
       const name = arg.replace(/[^\w.-]/g, '').slice(0, USER_MAX).toLowerCase();
       if (!name) return done(['usage: login <name>']);
+      if (isReserved(name)) return done([`login: ${name}: unauthorised`, 'nice try.']);
       setUser(name);
       return done([`welcome, ${name}`], [{ type: 'joy' }]);
     }
