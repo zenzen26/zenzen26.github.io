@@ -40,19 +40,43 @@ component, file, or helper unless you have to.
   one component → co-located `Component.css`.
 - **Typography**: pixel headings `h1–h4` (Pixelify Sans) and terminal body
   `b1–b3` (VT323), see `global.css`. Don't add inline font-size utilities.
-- **Reusable bases** (extend these, don't fork): `MacWindow` (every panel and
-  modal), `FloppyIcon` (resume downloads), `ProjectTile` (project thumbnails: Home +
-  Finder), `PixelSprite` → `PixelCat` (`lib/pixelCat.ts` sprite data),
-  `StaticTransition` (route change), `DesktopPet` (uses the header icon `public/favicon.png`), `ModalOverlay`, `TechStack`, `TypeBadge`; utilities `bevel-out`,
-  `bevel-in`, `crt`, `titlebar-stripes`; hook `useWindowReveal` (scroll
-  entrance/exit for any `MacWindow reveal`).
+- **Reusable bases** (extend these, don't fork): `MacWindow` (every panel), `ModalOverlay`
+  (every popup: portalled to <body>, X close button), `FloppyIcon` (resume downloads),
+  `ProjectTile` (project thumbnails: Home + Finder), `PixelSprite` → `PixelCat`
+  (`lib/pixelCat.ts` sprite data), `RoundedBox` (`components/three`), `TechStack`,
+  `TypeBadge`; utilities `bevel-out`, `bevel-in`, `crt`, `titlebar-stripes`; hooks
+  `useWindowReveal` (scroll entrance/exit for any `MacWindow reveal`), `useCSVData`,
+  `useCursor`. Logic with no React lives in `src/lib/` (`terminal.ts`, `macScreen.ts`).
+- **Never import `@react-three/drei`** (or other heavy helper libraries) for one small
+  feature: write the few lines instead.
 - **Path alias**: import with `@/…`.
 - **Animation**: GSAP, created inside `gsap.context()` and reverted on
   cleanup; honour `prefers-reduced-motion`.
 - **Data**: projects/experience come from `public/data/*.csv` via
-  `useCSVData`.
+  `useCSVData` (requests are started early in `main.tsx`).
+
+## Performance rules (the site scores ~95 mobile / 100 desktop on Lighthouse: keep it that way)
+
+- **The entry bundle stays small.** Anything heavy loads on demand: three.js
+  (`MacHero` → `Mac3D`), gsap + plugins (only where used; never in `App`/`main`),
+  `gifuct-js`, `papaparse`. Don't add a library to the entry path without checking
+  `npm run build` output.
+- **Hero = poster first.** `index.html` paints the static `#boot` poster; the 3D
+  Mac loads on first interaction or after idle. If the 3D scene's look changes,
+  regenerate `public/images/mac-poster-{lg,md,sm}.webp`. Don't swap the poster
+  element for a new one (a replaced element becomes a later LCP): fade it out.
+- **The hero never waits for data.** Below-the-fold sections render when the CSVs
+  arrive; reserve their space so nothing jumps.
+- **Images**: WebP, sized for display (thumbnails about 1000 px wide), `width`/`height`
+  or an aspect-ratio box, `loading="lazy"` below the fold, `priority` for the first
+  visible ones. Prefer CSS animation (`@keyframes` in `global.css`) over GSAP for
+  simple effects.
+- Pause per-frame work (3D rendering, canvas painting) when it is off-screen.
 
 ## Build / verify
 
-- `npm run build` (runs `vite build`); type-check with `npx tsc -p tsconfig.app.json --noEmit`.
-- `npm run dev` for the dev server.
+- `npm run lint` and `npm run typecheck` must both be clean (CI runs them), then
+  `npm run build`.
+- `npm run dev` for the dev server, `npm run preview` to serve the production build.
+- To check performance: build, `npm run preview`, then run Lighthouse (mobile and
+  desktop) against it.

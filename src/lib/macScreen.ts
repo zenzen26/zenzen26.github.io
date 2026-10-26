@@ -4,7 +4,7 @@ import { pathOf, promptFor, runTerminal, type Detail, type Dir, type Effect, typ
 /** Everything the 3D Mac's CRT shows and reacts to, painted on a 2D canvas texture. */
 export const SCREEN_W = 800;
 export const SCREEN_H = 600;
-export const BOOT_MS = 1600;
+const BOOT_MS = 1600;
 
 const TERM_LINES = 12;
 const MAX_TYPED = 44;

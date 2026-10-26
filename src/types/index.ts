@@ -34,5 +34,3 @@ export interface Experience {
   responsibilities?: string;
   location?: string;
 }
-
-export type ColorTag = 'green' | 'amber' | 'red' | 'black';

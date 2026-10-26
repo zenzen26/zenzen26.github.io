@@ -56,7 +56,7 @@ const USER_MAX = 16;
 const RESERVED = ['admin', 'administrator', 'root', 'zen', 'zenzen', 'zenzen26'];
 const isReserved = (name: string) => RESERVED.includes(name.toLowerCase());
 
-export function getUser(): string {
+function getUser(): string {
   try {
     const stored = localStorage.getItem(USER_KEY);
     return stored && !isReserved(stored) ? stored : 'guest';
@@ -90,7 +90,7 @@ const PLACES: Record<string, string> = {
 const FOLDERS: Record<string, Dir> = { projects: 'projects', work: 'work', jobs: 'work', experience: 'work', skills: 'skills' };
 
 /** Greedy word wrap to `width` columns, clipped to `maxLines` with an ellipsis. */
-export function wrap(text: string, width = WIDTH, maxLines = 99): string[] {
+function wrap(text: string, width = WIDTH, maxLines = 99): string[] {
   const out: string[] = [];
   let line = '';
   for (const word of text.replace(/\s+/g, ' ').trim().split(' ')) {

@@ -26,7 +26,11 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
       - run: npm run build
+      # GitHub Pages has no rewrites: serve the SPA shell for deep links such as /projects
+      - run: cp dist/index.html dist/404.html
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
