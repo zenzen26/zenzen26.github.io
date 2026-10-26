@@ -173,11 +173,12 @@ body, .b1, .b2, .b3, p, span, div, a, button, input, textarea, select, label {
 }
 
 /* ------------------------------------------------------------
-   Mickey-glove pixel cursors (public/cursors). Unlayered so they
-   win over Tailwind's cursor-* utilities. Hotspot = fingertip.
+   Mickey-glove pixel cursors (public/cursors): arrow, hand, pressed,
+   disabled, grab. Unlayered on purpose so they win over Tailwind's
+   cursor-* utilities. Hotspots: arrow/disabled 0,0; hand 10,0; pressed 10,2.
    ------------------------------------------------------------ */
 html {
-  cursor: url('/cursors/glove.svg') 10 0, auto;
+  cursor: url('/cursors/arrow.svg') 0 0, auto;
 }
 
 a,
@@ -187,24 +188,45 @@ select,
 [role='button'],
 .cursor-pointer,
 .cursor-zoom-in {
-  cursor: url('/cursors/glove.svg') 10 0, pointer;
+  cursor: url('/cursors/hand.svg') 10 0, pointer;
 }
 
-.cursor-grab {
-  cursor: url('/cursors/glove-grab.svg') 16 10, grab;
+/* while the mouse button is down */
+a:active,
+button:active,
+summary:active,
+[role='button']:active,
+.cursor-pointer:active,
+.cursor-zoom-in:active {
+  cursor: url('/cursors/pressed.svg') 10 2, pointer;
 }
 
-.cursor-grabbing {
-  cursor: url('/cursors/glove-grab.svg') 16 10, grabbing;
+/* picked up / dragging */
+.cursor-grab,
+.cursor-grab:active,
+.cursor-grabbing,
+button.cursor-grabbing,
+button.cursor-grabbing:active {
+  cursor: url('/cursors/grab.svg') 16 10, grab;
+}
+
+/* disabled things: last, so it beats the hand and pressed rules */
+button:disabled,
+[disabled],
+[aria-disabled='true'],
+.cursor-not-allowed,
+button:disabled:active,
+[aria-disabled='true']:active {
+  cursor: url('/cursors/disabled.svg') 0 0, not-allowed;
 }
 
 /* three.js (drei useCursor) writes an inline cursor on <body> while hovering the 3D Mac */
 body[style*='cursor: pointer'],
 body[style*='cursor:pointer'] {
-  cursor: url('/cursors/glove.svg') 10 0, pointer !important;
+  cursor: url('/cursors/hand.svg') 10 0, pointer !important;
 }
 
 body[style*='cursor: grab'],
 body[style*='cursor:grab'] {
-  cursor: url('/cursors/glove-grab.svg') 16 10, grab !important;
+  cursor: url('/cursors/grab.svg') 16 10, grab !important;
 }
