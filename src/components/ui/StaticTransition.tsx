@@ -1,25 +1,23 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { gsap } from 'gsap';
 
 const W = 192;
 const H = 108;
 
 /**
  * Old-Macintosh "no signal" TV static: a CRT-style sweep of noise that plays on first
- * load and on every route change (inner component is keyed by pathname).
+ * load and on every route change (inner component is keyed by pathname). The sweep itself
+ * is the `static-sweep` CSS animation in global.css; this only paints the noise.
  */
 function StaticRun() {
-  const rootRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [playing, setPlaying] = useState(
     () => !window.matchMedia('(prefers-reduced-motion: reduce)').matches
   );
 
   useEffect(() => {
-    const root = rootRef.current;
     const ctx = canvasRef.current?.getContext('2d');
-    if (!root || !ctx) return;
+    if (!ctx) return;
 
     const img = ctx.createImageData(W, H);
     const draw = () => {
@@ -32,23 +30,17 @@ function StaticRun() {
     };
     draw();
     const id = window.setInterval(draw, 60);
-
-    const tl = gsap
-      .timeline({ onComplete: () => setPlaying(false) })
-      .fromTo(root, { scaleY: 0.01, opacity: 1 }, { scaleY: 1, duration: 0.18, ease: 'steps(4)' })
-      .to({}, { duration: 0.35 })
-      .to(root, { opacity: 0, duration: 0.3, ease: 'steps(5)' });
-
-    return () => {
-      window.clearInterval(id);
-      tl.kill();
-    };
-  }, []);
+    return () => window.clearInterval(id);
+  }, [playing]);
 
   if (!playing) return null;
 
   return (
-    <div ref={rootRef} aria-hidden="true" className="fixed inset-0 z-[100] pointer-events-none bg-black">
+    <div
+      aria-hidden="true"
+      onAnimationEnd={() => setPlaying(false)}
+      className="animate-static-sweep fixed inset-0 z-[100] pointer-events-none bg-black"
+    >
       <canvas ref={canvasRef} width={W} height={H} className="size-full [image-rendering:pixelated]" />
       <div className="absolute inset-0 crt opacity-30" />
     </div>

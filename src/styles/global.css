@@ -248,3 +248,22 @@ body[style*='cursor:grab'] {
 .animate-heart {
   animation: heart-rise 1.4s steps(7) infinite;
 }
+
+/* Route-change TV static (components/ui/StaticTransition): CRT "turn-on" sweep, hold, fade out */
+@keyframes static-sweep {
+  0% { opacity: 1; transform: scaleY(0.01); animation-timing-function: steps(4); }
+  22% { opacity: 1; transform: scaleY(1); }
+  62% { opacity: 1; transform: scaleY(1); animation-timing-function: steps(5); }
+  100% { opacity: 0; transform: scaleY(1); }
+}
+.animate-static-sweep {
+  animation: static-sweep 0.83s linear forwards;
+}
+
+/* In-page links (smooth scroll is on <html>): land below the fixed menu bar, except the hero */
+[id] {
+  scroll-margin-top: 3.25rem;
+}
+#hero {
+  scroll-margin-top: 0;
+}

@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { gsap } from 'gsap';
 
 interface Section {
   id: string;
@@ -38,14 +37,7 @@ export default function StickyAnchor() {
   }, []);
 
   const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      gsap.to(window, {
-        duration: 1,
-        scrollTo: { y: element, offsetY: id === 'hero' ? 0 : 80 },
-        ease: 'power2.inOut',
-      });
-    }
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (

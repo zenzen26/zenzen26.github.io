@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
-import { gsap } from 'gsap';
 
 const navLinks = [
   { name: 'Home', href: '/' },
@@ -27,7 +26,7 @@ export default function Navigation() {
     setIsMobileMenuOpen(false);
     const footer = document.getElementById('footer');
     if (footer) {
-      gsap.to(window, { duration: 1, scrollTo: { y: footer, offsetY: 0 }, ease: 'power2.inOut' });
+      footer.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
