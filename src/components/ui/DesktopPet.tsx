@@ -68,7 +68,7 @@ function GlitchCat() {
 /**
  * The header's calico cat as a desktop pet. It waddles along the bottom facing the way it is
  * heading, sometimes crawls up the side of the screen, and can be picked up and dropped
- * (soft landing from low, "mew! ฅ^≧∇≦^ฅ" from high, a glitchy dizzy spell if swung around).
+ * (soft landing from low, "mew! >^<" from high, a glitchy dizzy spell if swung around).
  * Moods: meows when clicked, purrs when you hover or hold, hops for joy (resume downloads,
  * login, now and then), gets angry if spam-clicked and then sulks in a corner.
  */
@@ -110,7 +110,7 @@ export default function DesktopPet() {
     window.clearTimeout(timer.current);
     tween.current?.kill();
     setMode('joy');
-    say('yay! \\(^o^)/', 2000);
+    say('mew! ฅ^≧∇≦^ฅ', 2000);
     if (!btn || prefersReducedMotion()) {
       timer.current = window.setTimeout(() => settle(), 1200);
       return;
@@ -303,7 +303,7 @@ export default function DesktopPet() {
     const btn = hopRef.current;
     if (hard) {
       // ouch: mew, big squash, a dazed moment before getting up
-      say('mew! ฅ^≧∇≦^ฅ', 1500);
+      say('mew! >^<', 1500);
       setMode('hurt');
       if (btn) gsap.fromTo(btn, { scaleY: 0.55, transformOrigin: '50% 100%' }, { scaleY: 1, duration: 0.5, ease: 'bounce.out', clearProps: 'transform,transformOrigin' });
       timer.current = window.setTimeout(swing.current.dizzy ? daze : () => settle(), 1300);
