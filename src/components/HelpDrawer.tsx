@@ -23,7 +23,7 @@ export default function HelpDrawer() {
       </button>
 
       <MacWindow title="Commands.txt" className="w-[78vw] max-w-sm" bodyClassName="p-3">
-        <p className="b3 mb-2">Tap the screen, then type. Swipe for more →</p>
+        <p className="b3 mb-2">Tap the screen, then type.</p>
         <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
           {COMMAND_GROUPS.map((group, i) => (
             <section key={group.title} className="bevel-in w-[85%] shrink-0 snap-start bg-white p-3">
