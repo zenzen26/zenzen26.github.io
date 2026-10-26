@@ -50,6 +50,11 @@ function drawScreen(ctx: CanvasRenderingContext2D, s: ScreenState, cursorOn: boo
   if (!s.on) {
     ctx.fillStyle = '#050805';
     ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = 'rgba(85,242,139,0.55)';
+    ctx.font = '40px "VT323", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('screen off', W / 2, H / 2 - 10);
+    ctx.fillText('press the POWER button below', W / 2, H / 2 + 36);
     return;
   }
 
@@ -187,6 +192,67 @@ function Wire({ points, radius = 0.03 }: { points: [number, number, number][]; r
   );
 }
 
+type Glyph = 'power' | 'eject';
+
+/** Paints a transparent-background icon (power symbol / eject triangle) as a texture. */
+function useGlyphTexture(kind: Glyph) {
+  return useMemo(() => {
+    const c = document.createElement('canvas');
+    c.width = c.height = 128;
+    const g = c.getContext('2d')!;
+    g.strokeStyle = themeColor('ink');
+    g.fillStyle = themeColor('ink');
+    g.lineWidth = 14;
+    g.lineCap = 'round';
+    if (kind === 'power') {
+      g.beginPath();
+      g.arc(64, 72, 36, -Math.PI / 2 + 0.65, (3 * Math.PI) / 2 - 0.65);
+      g.stroke();
+      g.beginPath();
+      g.moveTo(64, 20);
+      g.lineTo(64, 68);
+      g.stroke();
+    } else {
+      g.beginPath();
+      g.moveTo(64, 26);
+      g.lineTo(104, 76);
+      g.lineTo(24, 76);
+      g.closePath();
+      g.fill();
+      g.fillRect(24, 92, 80, 16);
+    }
+    return new CanvasTexture(c);
+  }, [kind]);
+}
+
+/** Small engraved caption under a control ("POWER", "EJECT", ...). */
+function Caption({ text, position }: { text: string; position: [number, number, number] }) {
+  const texture = useMemo(() => {
+    const c = document.createElement('canvas');
+    c.width = 256;
+    c.height = 64;
+    return new CanvasTexture(c);
+  }, []);
+  useEffect(() => {
+    const paint = () => {
+      const g = (texture.image as HTMLCanvasElement).getContext('2d')!;
+      g.clearRect(0, 0, 256, 64);
+      g.fillStyle = themeColor('ink');
+      g.font = '700 38px "Pixelify Sans", monospace';
+      g.textAlign = 'center';
+      g.fillText(text, 128, 44);
+      texture.needsUpdate = true;
+    };
+    document.fonts.load('700 38px "Pixelify Sans"').finally(paint);
+  }, [text, texture]);
+  return (
+    <mesh position={position}>
+      <planeGeometry args={[0.62, 0.155]} />
+      <meshBasicMaterial map={texture} transparent toneMapped={false} />
+    </mesh>
+  );
+}
+
 const KEY_ROWS = ['qwertyuiop', 'asdfghjkl;', 'zxcvbnm,./'];
 
 function Key({ char, x, z, width = 0.22, onPress }: { char: string; x: number; z: number; width?: number; onPress: (c: string) => void }) {
@@ -216,9 +282,10 @@ function Key({ char, x, z, width = 0.22, onPress }: { char: string; x: number; z
 }
 
 /** Small clickable push-button on the case. */
-function PushButton({ position, size = 0.18, color, onPress }: { position: [number, number, number]; size?: number; color: string; onPress: () => void }) {
+function PushButton({ position, size = 0.18, color, glyph, onPress }: { position: [number, number, number]; size?: number; color: string; glyph?: Glyph; onPress: () => void }) {
   const mesh = useRef<Mesh>(null);
   const [hover, setHover] = useState(false);
+  const icon = useGlyphTexture(glyph ?? 'power');
   useCursor(hover);
 
   return (
@@ -236,6 +303,12 @@ function PushButton({ position, size = 0.18, color, onPress }: { position: [numb
     >
       <boxGeometry args={[size, size, 0.08]} />
       <meshStandardMaterial color={hover ? themeColor('phosphor') : color} roughness={0.5} />
+      {glyph && (
+        <mesh position={[0, 0, 0.042]}>
+          <planeGeometry args={[size * 0.8, size * 0.8]} />
+          <meshBasicMaterial map={icon} transparent toneMapped={false} />
+        </mesh>
+      )}
     </mesh>
   );
 }
@@ -252,8 +325,8 @@ function MacModel() {
   const ejected = useRef(false);
   useCursor(screenHover || knobHover);
 
-  const beige = themeColor('beige');
-  const shade = themeColor('grey');
+  const beige = themeColor('plastic');
+  const shade = themeColor('plastic-dark');
   const ink = themeColor('ink');
   const light = themeColor('beige-light');
 
@@ -291,15 +364,15 @@ function MacModel() {
   return (
     <group>
       {/* case: squarer CRT body + rear hump */}
-      <RoundedBox args={[2.9, 2.7, 2.4]} radius={0.14} smoothness={4}>
+      <RoundedBox args={[2.9, 2.7, 2.4]} radius={0.04} smoothness={2}>
         <meshStandardMaterial color={beige} roughness={0.7} />
       </RoundedBox>
-      <RoundedBox args={[2.3, 2.1, 1.1]} radius={0.12} smoothness={4} position={[0, 0.1, -1.7]}>
+      <RoundedBox args={[2.3, 2.1, 1.1]} radius={0.04} smoothness={2} position={[0, 0.1, -1.7]}>
         <meshStandardMaterial color={beige} roughness={0.75} />
       </RoundedBox>
 
       {/* screen bezel + CRT (clickable) */}
-      <RoundedBox args={[2.4, 1.85, 0.1]} radius={0.06} position={[0, 0.4, 1.22]}>
+      <RoundedBox args={[2.4, 1.85, 0.1]} radius={0.02} position={[0, 0.4, 1.22]}>
         <meshStandardMaterial color={shade} roughness={0.6} />
       </RoundedBox>
       <mesh
@@ -344,15 +417,18 @@ function MacModel() {
       </group>
 
       {/* power button + LED, eject button, brightness knob */}
-      <PushButton position={[-0.95, -1.04, 1.24]} color={light} onPress={togglePower} />
-      <mesh position={[-0.65, -1.04, 1.23]}>
-        <boxGeometry args={[0.07, 0.07, 0.04]} />
+      <PushButton position={[-0.95, -0.96, 1.24]} size={0.3} glyph="power" color={power ? light : themeColor('phosphor')} onPress={togglePower} />
+      <Caption text="POWER" position={[-0.95, -1.14, 1.225]} />
+      <mesh position={[-0.62, -0.96, 1.23]}>
+        <boxGeometry args={[0.1, 0.1, 0.04]} />
         <meshStandardMaterial color={power ? themeColor('phosphor') : ink} emissive={power ? themeColor('phosphor') : '#000000'} emissiveIntensity={power ? 1.5 : 0} />
       </mesh>
-      <PushButton position={[0.95, -1.04, 1.24]} color={light} onPress={eject} />
+      <PushButton position={[0.95, -0.96, 1.24]} size={0.3} glyph="eject" color={light} onPress={eject} />
+      <Caption text="EJECT" position={[0.95, -1.14, 1.225]} />
+      <Caption text="BRIGHT" position={[0.5, -1.14, 1.225]} />
       <mesh
         ref={knob}
-        position={[0.55, -1.04, 1.26]}
+        position={[0.5, -0.96, 1.26]}
         rotation={[Math.PI / 2, 0, 0]}
         onClick={(e) => { e.stopPropagation(); if (e.delta <= 5) cycleBrightness(); }}
         onPointerOver={(e) => { e.stopPropagation(); setKnobHover(true); }}
@@ -364,7 +440,7 @@ function MacModel() {
 
       {/* keyboard (floor is y = -1.35) */}
       <group position={[0, -1.28, 2.75]}>
-        <RoundedBox args={[3.1, 0.14, 1.15]} radius={0.04}>
+        <RoundedBox args={[3.1, 0.14, 1.15]} radius={0.02}>
           <meshStandardMaterial color={beige} roughness={0.7} />
         </RoundedBox>
         {KEY_ROWS.map((row, r) =>
@@ -376,7 +452,7 @@ function MacModel() {
       </group>
 
       {/* mouse */}
-      <RoundedBox args={[0.4, 0.14, 0.62]} radius={0.05} position={[2.1, -1.28, 2.75]}>
+      <RoundedBox args={[0.4, 0.14, 0.62]} radius={0.03} position={[2.1, -1.28, 2.75]}>
         <meshStandardMaterial color={beige} roughness={0.7} />
       </RoundedBox>
       <mesh position={[2.1, -1.2, 2.58]}>
@@ -401,7 +477,10 @@ function Rig({ rot, dragging }: { rot: MutableRefObject<Rotation>; dragging: Mut
   const aspect = useThree((s) => s.size.width / s.size.height);
   const camera = useThree((s) => s.camera);
   // Pull the camera back on narrow screens so the keyboard and mouse never get cropped.
-  useEffect(() => { camera.position.z = Math.max(7.4, 11.5 / aspect); }, [camera, aspect]);
+  useEffect(() => {
+    camera.position.set(0, 0.4, Math.max(9.4, 12.5 / aspect));
+    camera.lookAt(0, -0.1, 0);
+  }, [camera, aspect]);
   useFrame(({ clock }) => {
     if (!group.current) return;
     group.current.rotation.set(rot.current.x, rot.current.y, 0);
@@ -478,9 +557,9 @@ export default function Mac3D({ className = '' }: { className?: string }) {
       role="img"
       aria-label="Interactive 3D Macintosh showing my portfolio. Drag to rotate; click its buttons, keys and screen."
     >
-      <Canvas camera={{ position: [0, 0.5, 8], fov: 32 }} dpr={[1, 1.75]} className="!absolute inset-0">
-        <ambientLight intensity={0.9} />
-        <directionalLight position={[4, 6, 5]} intensity={2} />
+      <Canvas camera={{ position: [0, 0.4, 9.4], fov: 32 }} dpr={[1, 1.75]} className="!absolute inset-0">
+        <ambientLight intensity={0.75} />
+        <directionalLight position={[4, 6, 5]} intensity={1.5} />
         <directionalLight position={[-5, 2, -3]} intensity={0.6} />
         <Rig rot={rot} dragging={dragging} />
         <ContactShadows position={[0, -1.36, 0]} opacity={0.5} scale={11} blur={2.5} far={4} />

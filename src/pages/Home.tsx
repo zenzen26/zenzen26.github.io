@@ -7,6 +7,7 @@ import IndustriesTech from '@/components/IndustriesTech';
 import StickyExperience from '@/components/StickyExperience';
 import FooterResume from '@/components/FooterResume';
 import StickyAnchor from '@/components/StickyAnchor';
+import HeroHelp from '@/components/HeroHelp';
 import Container from '@/components/ui/Container';
 import MacWindow from '@/components/ui/MacWindow';
 import PageLoader from '@/components/ui/PageLoader';
@@ -53,7 +54,7 @@ export default function Home() {
       <StickyAnchor />
 
       {/* Hero — the 3D Mac IS the hero; its screen carries the intro (see Mac3D) */}
-      <section id="hero" className="pt-12 pb-6">
+      <section id="hero" className="relative pt-12 pb-6">
         <h1 className="sr-only">ZENZEN — Web Developer &amp; Server Engineer</h1>
         <div className="h-[calc(100svh-4rem)] min-h-[520px]">
           <Suspense fallback={<div className="size-full flex items-center justify-center"><PixelCat scale={10} className="animate-pixel-bob" /></div>}>
@@ -61,8 +62,16 @@ export default function Home() {
           </Suspense>
         </div>
 
+        {/* Wide screens: controls cheat-sheet to the left of the Mac */}
+        <div className="hidden xl:block absolute left-8 top-1/2 -translate-y-1/2 z-10 w-72">
+          <HeroHelp />
+        </div>
+        <Container className="xl:hidden mt-6">
+          <HeroHelp />
+        </Container>
+
         {/* Phones: the on-screen text is tiny, so repeat the intro as a readable window */}
-        <Container className="md:hidden">
+        <Container className="md:hidden mt-6">
           <MacWindow title="Welcome.txt" bodyClassName="p-5">
             <div className="inline-flex items-center gap-2 bg-phosphor border-2 border-ink px-3 mb-4 b2">
               <span className="size-3 bg-ink animate-pixel-bob" /> OPEN TO WORK
