@@ -262,10 +262,12 @@ function PushButton({ position, size = 0.18, color, glyph, onPress }: { position
 }
 
 function MacModel({ data }: { data: TermData }) {
-  const ui = useRef<ScreenState>(null as unknown as ScreenState);
-  if (!ui.current) ui.current = createScreen();
+  // mutable screen state shared with the canvas painter (only the first value is kept)
+  const ui = useRef<ScreenState>(createScreen());
   const dataRef = useRef(data);
-  dataRef.current = data;
+  useEffect(() => {
+    dataRef.current = data;
+  }, [data]);
   const { texture } = useScreen(ui);
   const [power, setPower] = useState(true);
   const [bright, setBright] = useState(2);
@@ -365,7 +367,9 @@ function MacModel({ data }: { data: TermData }) {
 
   // Real keyboard: click the screen to start typing, ESC or a click elsewhere to stop.
   const typeRef = useRef(type);
-  typeRef.current = type;
+  useEffect(() => {
+    typeRef.current = type;
+  });
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!ui.current.focus) return;

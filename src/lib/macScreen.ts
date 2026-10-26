@@ -311,7 +311,7 @@ function loadDisk() {
     for (const f of patches) {
       patch.width = f.dims.width;
       patch.height = f.dims.height;
-      patchCtx.putImageData(new ImageData(f.patch, f.dims.width, f.dims.height), 0, 0);
+      patchCtx.putImageData(new ImageData(new Uint8ClampedArray(f.patch), f.dims.width, f.dims.height), 0, 0);
       fullCtx.drawImage(patch, f.dims.left, f.dims.top);
 
       const snapshot = document.createElement('canvas');

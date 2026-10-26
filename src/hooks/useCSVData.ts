@@ -25,7 +25,7 @@ export function useCSVData<T>(path: string) {
             setLoading(false);
           },
         });
-      } catch (err) {
+      } catch {
         setError('Failed to fetch data');
         setLoading(false);
       }
