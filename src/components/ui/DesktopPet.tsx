@@ -1,13 +1,9 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { gsap } from 'gsap';
-import PixelSprite from '@/components/ui/PixelSprite';
-import { PET_FRAMES, type PetPose } from '@/lib/petCat';
 import { CAT_EVENT } from '@/lib/catEvent';
 
 const SPEED = 60; // px per second
-const SCALE = 3;
-const WIDTH = 24 * SCALE;
-const STAND_HEIGHT = 17 * SCALE;
+const SIZE = 88; // px; the 40×40 header icon drawn at 2.2×
 const REST_BOTTOM = 4; // px above the viewport bottom
 const GRAVITY = 2200; // px / s²
 const DRAG_THRESHOLD = 4; // px before a press counts as a drag
@@ -16,7 +12,10 @@ type Mode = 'sit' | 'walk' | 'held' | 'fall';
 
 const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/** Ginger tabby that walks head-first along the bottom, can be picked up and dropped, and meows when clicked. */
+/**
+ * The header's calico cat, as a desktop pet: waddles along the bottom facing the way it is
+ * heading, can be picked up and dropped, and meows when clicked.
+ */
 export default function DesktopPet() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const hopRef = useRef<HTMLButtonElement>(null);
@@ -27,7 +26,6 @@ export default function DesktopPet() {
   const [mode, setMode] = useState<Mode>('sit');
   const [facing, setFacing] = useState<1 | -1>(1);
   const [step, setStep] = useState(false);
-  const [blink, setBlink] = useState(false);
   const [bubble, setBubble] = useState(false);
 
   const settle = () => {
@@ -42,7 +40,7 @@ export default function DesktopPet() {
     const wrap = wrapRef.current;
     if (!wrap) return;
     const from = Number(gsap.getProperty(wrap, 'x'));
-    const to = gsap.utils.random(16, Math.max(32, window.innerWidth - WIDTH - 16), 1);
+    const to = gsap.utils.random(16, Math.max(32, window.innerWidth - SIZE - 16), 1);
     setFacing(to > from ? 1 : -1);
     setMode('walk');
     tween.current = gsap.to(wrap, { x: to, duration: Math.abs(to - from) / SPEED, ease: 'none', onComplete: settle });
@@ -59,20 +57,10 @@ export default function DesktopPet() {
     };
   }, []);
 
-  // Alternate the walk frames (and a little hop) while walking
+  // Waddle: tilt side to side with a little hop while walking
   useEffect(() => {
     if (mode !== 'walk') return;
-    const id = window.setInterval(() => setStep((s) => !s), 220);
-    return () => window.clearInterval(id);
-  }, [mode]);
-
-  // Blink now and then while sitting
-  useEffect(() => {
-    if (mode !== 'sit') return;
-    const id = window.setInterval(() => {
-      setBlink(true);
-      window.setTimeout(() => setBlink(false), 180);
-    }, 2600);
+    const id = window.setInterval(() => setStep((s) => !s), 200);
     return () => window.clearInterval(id);
   }, [mode]);
 
@@ -104,9 +92,9 @@ export default function DesktopPet() {
     if (!grab.current.moved && Math.hypot(e.clientX - grab.current.x, e.clientY - grab.current.y) < DRAG_THRESHOLD) return;
     grab.current.moved = true;
     setMode('held');
-    const restTop = window.innerHeight - REST_BOTTOM - STAND_HEIGHT;
+    const restTop = window.innerHeight - REST_BOTTOM - SIZE;
     gsap.set(wrap, {
-      x: Math.min(Math.max(e.clientX - WIDTH / 2, 0), window.innerWidth - WIDTH),
+      x: Math.min(Math.max(e.clientX - SIZE / 2, 0), window.innerWidth - SIZE),
       y: Math.min(e.clientY - restTop - 8, 0), // held by the scruff, never below the floor
     });
   };
@@ -141,28 +129,41 @@ export default function DesktopPet() {
     });
   };
 
-  const pose: PetPose =
-    mode === 'walk' ? (step ? 'walkA' : 'walkB') : mode === 'held' || mode === 'fall' ? 'held' : blink ? 'blink' : 'idle';
+  // Tilt and hop live on an inner wrapper so GSAP (which owns the button transform) never fights them.
+  const motion =
+    mode === 'walk'
+      ? `${step ? 'rotate-3 -translate-y-1' : '-rotate-3'}`
+      : mode === 'held' || mode === 'fall'
+        ? '-rotate-12'
+        : '';
 
   return (
     <div ref={wrapRef} className="fixed left-0 z-[55] pointer-events-none" style={{ bottom: REST_BOTTOM }}>
       {bubble && (
-        <span className="absolute -top-9 left-1/2 -translate-x-1/2 b3 bg-beige-light text-ink border-2 border-ink px-2 whitespace-nowrap">
+        <span className="absolute -top-6 left-1/2 -translate-x-1/2 b3 bg-beige-light text-ink border-2 border-ink px-2 whitespace-nowrap">
           mrrp!
         </span>
       )}
       <button
         ref={hopRef}
         type="button"
-        aria-label="Pet the ginger cat (drag to pick it up)"
+        aria-label="Pet the calico cat (drag to pick it up)"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
         className={`pointer-events-auto touch-none select-none block ${mode === 'held' ? 'cursor-grabbing' : 'cursor-grab'}`}
       >
-        <div className={`${facing === -1 ? '-scale-x-100' : ''} ${mode === 'walk' && step ? '-translate-y-1' : ''}`}>
-          <PixelSprite grid={PET_FRAMES[pose]} scale={SCALE} />
+        <div className={`origin-bottom transition-transform duration-200 ${facing === -1 ? '-scale-x-100' : ''} ${motion}`}>
+          {/* the icon's art sits above a transparent margin; pull it down so the paws touch the floor */}
+          <img
+            src="/favicon.png"
+            alt=""
+            draggable={false}
+            width={SIZE}
+            height={SIZE}
+            className="translate-y-3 [image-rendering:pixelated]"
+          />
         </div>
       </button>
     </div>

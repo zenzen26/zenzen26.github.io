@@ -1,5 +1,4 @@
 import { themeColor } from '@/lib/pixelCat';
-import { PET_FRAMES } from '@/lib/petCat';
 import { pathOf, promptFor, runTerminal, type Detail, type Dir, type Effect, type TermData } from '@/lib/terminal';
 
 /** Everything the 3D Mac's CRT shows and reacts to, painted on a 2D canvas texture. */
@@ -218,17 +217,20 @@ function drawTerminal(ctx: CanvasRenderingContext2D, s: ScreenState, cursorOn: b
   ctx.fillText(`${prompt}${s.typed.slice(-room)}${cursorOn ? '_' : ' '}`, 40, 574);
 }
 
+let catIcon: HTMLImageElement | undefined;
+
+/** The header's calico icon (public/favicon.png), loaded once. */
+function getCatIcon() {
+  if (!catIcon) {
+    catIcon = new Image();
+    catIcon.src = '/favicon.png';
+  }
+  return catIcon;
+}
+
 function drawCatPopup(ctx: CanvasRenderingContext2D) {
   const ink = themeColor('ink');
   const light = themeColor('beige-light');
-  const colors: Record<string, string> = {
-    o: themeColor('calico'),
-    y: themeColor('tabby'),
-    g: themeColor('phosphor'),
-    k: themeColor('blush'),
-    w: '#ffffff',
-    '#': ink,
-  };
   const px = 100;
   const py = 110;
   const pw = 600;
@@ -253,22 +255,19 @@ function drawCatPopup(ctx: CanvasRenderingContext2D) {
   ctx.textAlign = 'center';
   ctx.fillText('cat.txt', px + pw / 2, py + 32);
 
-  const frame = PET_FRAMES.idle;
-  const sc = 9;
-  const ox = px + (pw - frame[0].length * sc) / 2;
-  frame.forEach((row, y) =>
-    [...row].forEach((c, x) => {
-      if (!colors[c]) return;
-      ctx.fillStyle = colors[c];
-      ctx.fillRect(ox + x * sc, py + 62 + y * sc, sc, sc);
-    })
-  );
+  const icon = getCatIcon();
+  if (icon.complete && icon.naturalWidth) {
+    const size = 200;
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(icon, px + (pw - size) / 2, py + 40, size, size);
+    ctx.imageSmoothingEnabled = true;
+  }
 
   ctx.fillStyle = ink;
   ctx.font = '32px "VT323", monospace';
-  ctx.fillText('you thought you were going to read a file?', px + pw / 2, py + 252);
+  ctx.fillText('you thought you were going to read a file?', px + pw / 2, py + 262);
   ctx.font = '700 40px "Pixelify Sans", monospace';
-  ctx.fillText('nope. it is a cat!  =^..^=', px + pw / 2, py + 306);
+  ctx.fillText('nope. it is a cat!  =^..^=', px + pw / 2, py + 312);
   ctx.textAlign = 'left';
 }
 

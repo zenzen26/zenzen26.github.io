@@ -42,8 +42,8 @@ component, file, or helper unless you have to.
   `b1–b3` (VT323), see `global.css`. Don't add inline font-size utilities.
 - **Reusable bases** (extend these, don't fork): `MacWindow` (every panel and
   modal), `FloppyIcon` (resume downloads), `ProjectTile` (project thumbnails: Home +
-  Finder), `PixelSprite` → `PixelCat` / desktop pet (`lib/pixelCat.ts`, `lib/petCat.ts`
-  sprite data), `StaticTransition` (route change), `DesktopPet`, `ModalOverlay`, `TechStack`, `TypeBadge`; utilities `bevel-out`,
+  Finder), `PixelSprite` → `PixelCat` (`lib/pixelCat.ts` sprite data),
+  `StaticTransition` (route change), `DesktopPet` (uses the header icon `public/favicon.png`), `ModalOverlay`, `TechStack`, `TypeBadge`; utilities `bevel-out`,
   `bevel-in`, `crt`, `titlebar-stripes`; hook `useWindowReveal` (scroll
   entrance/exit for any `MacWindow reveal`).
 - **Path alias**: import with `@/…`.

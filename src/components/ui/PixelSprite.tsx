@@ -3,9 +3,6 @@ const FILL: Record<string, string> = {
   g: 'fill-phosphor',
   p: 'fill-grey',
   w: 'fill-white',
-  o: 'fill-calico',
-  y: 'fill-tabby',
-  k: 'fill-blush',
 };
 
 interface PixelSpriteProps {
