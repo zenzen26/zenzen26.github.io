@@ -10,10 +10,12 @@ interface ProjectTileProps {
   onClick: () => void;
   /** Animate in/out on scroll (see useWindowReveal). */
   reveal?: boolean;
+  /** Above-the-fold tile: load its image right away instead of lazily. */
+  priority?: boolean;
 }
 
 /** Project as a Mac window with a large 16:10 thumbnail; used by Home and the Finder. */
-export default function ProjectTile({ project, onClick, reveal = false }: ProjectTileProps) {
+export default function ProjectTile({ project, onClick, reveal = false, priority = false }: ProjectTileProps) {
   return (
     <div
       role="button"
@@ -39,7 +41,9 @@ export default function ProjectTile({ project, onClick, reveal = false }: Projec
             <img
               src={project.image_url}
               alt={`${project.title} thumbnail`}
-              loading="lazy"
+              loading={priority ? "eager" : "lazy"}
+              fetchPriority={priority ? "high" : "auto"}
+              decoding="async"
               className="size-full object-cover object-top transition-transform duration-300 group-hover:scale-105"
             />
           ) : (

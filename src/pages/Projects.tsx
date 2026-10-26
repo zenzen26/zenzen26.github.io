@@ -90,8 +90,8 @@ export default function Projects() {
             <div className="p-6 sm:p-8 bg-forest-deep text-beige-light min-h-[50vh]">
               {view === 'icons' ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {filteredProjects.map((project) => (
-                    <ProjectTile key={project.id} project={project} onClick={() => setSelectedProject(project)} />
+                  {filteredProjects.map((project, i) => (
+                    <ProjectTile key={project.id} project={project} priority={i < 3} onClick={() => setSelectedProject(project)} />
                   ))}
                 </div>
               ) : (

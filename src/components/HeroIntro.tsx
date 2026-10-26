@@ -4,6 +4,7 @@ import ModalOverlay from '@/components/ui/ModalOverlay';
 
 const TECH = ['React', 'TypeScript', 'Docker', 'n8n', 'PHP'];
 const PHOTO = '/images/cat.webp';
+const PHOTO_THUMB = '/images/cat-thumb.webp';
 const PHOTO_ALT = 'Zenzen at work, smiling at the camera';
 
 /** "About.txt": selfie (click to enlarge), the full intro paragraph and tech chips. Sits beside (xl) or under the 3D hero. */
@@ -20,7 +21,15 @@ export default function HeroIntro({ className = '' }: { className?: string }) {
             onClick={() => setOpen(true)}
             className="bevel-in block w-full bg-forest overflow-hidden aspect-[16/10] cursor-zoom-in"
           >
-            <img src={PHOTO} alt={PHOTO_ALT} className="size-full object-cover object-[50%_30%]" />
+            <img
+              src={PHOTO_THUMB}
+              alt={PHOTO_ALT}
+              width={720}
+              height={960}
+              loading="lazy"
+              decoding="async"
+              className="size-full object-cover object-[50%_30%]"
+            />
           </button>
           <figcaption className="b3 text-ink/60 mt-1 text-center">zenzen @ 2024 · Sydney, NSW · click to enlarge</figcaption>
         </figure>
