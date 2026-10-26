@@ -6,8 +6,8 @@ import { CAT_EVENT } from '@/lib/catEvent';
 
 const SPEED = 60; // px per second
 const SCALE = 4;
-const WIDTH = 20 * SCALE;
-const STAND_HEIGHT = 11 * SCALE;
+const WIDTH = 24 * SCALE;
+const STAND_HEIGHT = 12 * SCALE;
 const REST_BOTTOM = 4; // px above the viewport bottom
 const GRAVITY = 2200; // px / s²
 const DRAG_THRESHOLD = 4; // px before a press counts as a drag

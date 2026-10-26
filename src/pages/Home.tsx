@@ -1,13 +1,14 @@
-import { useEffect, useRef, lazy, Suspense } from 'react';
+import { Fragment, useEffect, useRef, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { GraduationCap, Mail, Globe, ShieldCheck, RotateCcw, LoaderCircle } from 'lucide-react';
+import { RotateCcw, LoaderCircle } from 'lucide-react';
 import FeaturedProjects from '@/components/FeaturedProjects';
 import IndustriesTech from '@/components/IndustriesTech';
 import StickyExperience from '@/components/StickyExperience';
 import FooterResume from '@/components/FooterResume';
 import StickyAnchor from '@/components/StickyAnchor';
 import HeroHelp from '@/components/HeroHelp';
+import HelpDrawer from '@/components/HelpDrawer';
 import HeroIntro from '@/components/HeroIntro';
 import { resetView } from '@/lib/viewReset';
 import Container from '@/components/ui/Container';
@@ -26,8 +27,6 @@ const personalDetails = {
   education: 'Bachelor of Computing Science (First Class Honours)',
   contact: ['+61 450 190 503', 'thamzien@gmail.com'],
 };
-
-const scrollTo = (selector: string) => document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth' });
 
 export default function Home() {
   const { data: projects, loading: projectsLoading } = useCSVData<Project>('/data/projects.csv');
@@ -64,9 +63,11 @@ export default function Home() {
               </div>
             }
           >
-            <Mac3D className="size-full" />
+            <Mac3D className="size-full" projects={projects} experiences={experiences} />
           </Suspense>
         </div>
+
+        <HelpDrawer />
 
         <button
           type="button"
@@ -107,25 +108,33 @@ export default function Home() {
 
       <section className="py-16 sm:py-20 bg-moss/25">
         <Container>
-          <MacWindow title="ReadMe.txt" reveal bodyClassName="p-6 sm:p-10">
-            <dl className="mx-auto max-w-3xl space-y-5">
-              {[
-                { icon: Globe, title: 'Languages', items: personalDetails.languages },
-                { icon: ShieldCheck, title: 'Certificates', items: personalDetails.certificates },
-                { icon: GraduationCap, title: 'Education', items: [personalDetails.education] },
-                { icon: Mail, title: 'Contact', items: personalDetails.contact },
-              ].map(({ icon: Icon, title, items }) => (
-                <div key={title} className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
-                  <dt className="flex shrink-0 items-center gap-2 font-pixel text-xl">
-                    <Icon size={18} className="text-moss" /> {title}
-                  </dt>
-                  <span aria-hidden="true" className="hidden sm:block flex-1 border-b-2 border-dotted border-ink/40" />
-                  <dd className="b2 sm:text-right">
-                    {items.map((item) => <div key={item}>{item}</div>)}
-                  </dd>
+          <MacWindow title="About This Zen" reveal className="mx-auto max-w-3xl" bodyClassName="p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row gap-6 sm:gap-8">
+              <div className="flex shrink-0 flex-col items-center gap-2 sm:w-36">
+                <div className="bevel-in bg-forest size-28 flex items-center justify-center">
+                  <img src="/favicon.png" alt="" className="size-20 object-contain" />
                 </div>
-              ))}
-            </dl>
+                <p className="font-pixel text-xl text-center">Zi En Tham</p>
+                <p className="b3 text-ink/60">ZEN OS 1.0</p>
+              </div>
+              <dl className="flex-1 grid grid-cols-[auto_1fr] gap-x-5 gap-y-3 b2">
+                {[
+                  ['Languages', personalDetails.languages],
+                  ['Certificates', personalDetails.certificates],
+                  ['Education', [personalDetails.education]],
+                  ['Contact', personalDetails.contact],
+                ].map(([label, items]) => (
+                  <Fragment key={label as string}>
+                    <dt className="font-pixel text-moss">{label as string}</dt>
+                    <dd>
+                      {(items as string[]).map((item) => (
+                        <div key={item}>{item}</div>
+                      ))}
+                    </dd>
+                  </Fragment>
+                ))}
+              </dl>
+            </div>
           </MacWindow>
         </Container>
       </section>

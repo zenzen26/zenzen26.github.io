@@ -3,6 +3,7 @@ import { Code2, Server, Bot, Banknote, ChartColumn } from 'lucide-react';
 import MacWindow from '@/components/ui/MacWindow';
 import Container from '@/components/ui/Container';
 import { useWindowReveal } from '@/hooks/useWindowReveal';
+import { skills, type SkillCategory } from '@/lib/skills';
 
 const industries = [
   { name: 'Web Dev', icon: Code2, tagline: 'Building attractive web experiences' },
@@ -12,16 +13,7 @@ const industries = [
   { name: 'Analyst', icon: ChartColumn, tagline: 'Turning data into insight' },
 ];
 
-const skills = {
-  Frontend: ['React', 'TypeScript', 'Tailwind CSS', 'ThreeJS', 'GSAP'],
-  Backend: ['PHP', 'Python', 'MySQL', 'PostgreSQL', 'NextJS', 'Redis', 'REST APIs'],
-  'Server & DevOps': ['Docker', 'Nginx', 'Traefik', 'GitHub Actions', 'Cloudflare', 'Linux', 'MariaDB'],
-  'AI & Automation': ['n8n', 'LangChain', 'TensorFlow', 'PyTorch', 'scikit-learn'],
-  Analytics: ['Pandas', 'SQL', 'Tableau', 'PowerBI', 'Excel'],
-  Other: ['Git', 'Vercel', 'Vite', 'Figma', 'Spline', 'Framer', 'Wordpress'],
-} as const;
-
-type Category = keyof typeof skills;
+type Category = SkillCategory;
 const categories = Object.keys(skills) as Category[];
 
 /** Icon tiles for industries (caption in a status bar) and a sidebar + pane for the tech stack. */

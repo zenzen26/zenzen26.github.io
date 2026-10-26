@@ -7,7 +7,8 @@ import PixelCat from '@/components/ui/PixelCat';
 import { themeColor } from '@/lib/pixelCat';
 import { RESET_VIEW_EVENT } from '@/lib/viewReset';
 import { CAT_EVENT } from '@/lib/catEvent';
-import { PET_FRAMES } from '@/lib/petCat';
+import { SCREEN_W, SCREEN_H, createScreen, drawScreen, screenButtons, scrollTerm, submit, typeChar, TERM_PAGE, type ScreenState } from '@/lib/macScreen';
+import type { Effect, TermData } from '@/lib/terminal';
 
 /** Turn limit ±25° left/right, only ±8° up/down; resting poses snap to 12.5° / 4° steps. */
 const LIMIT_Y = (25 * Math.PI) / 180;
@@ -15,184 +16,12 @@ const LIMIT_X = (8 * Math.PI) / 180;
 const SNAP_STEP_Y = (12.5 * Math.PI) / 180;
 const SNAP_STEP_X = (4 * Math.PI) / 180;
 const IDLE_RETURN_MS = 5000;
-const BOOT_MS = 1600;
 const BRIGHTNESS = [0.55, 0.8, 1];
-
-const SCREEN_W = 800;
-const SCREEN_H = 600;
 
 interface Rotation { x: number; y: number }
 
-/** Clickable regions painted on the screen, in canvas pixels. */
-const SCREEN_BUTTONS = [
-  { id: 'projects', label: 'VIEW PROJECTS', x: 40, y: 410, w: 300, h: 66, target: '#projects' },
-  { id: 'contact', label: 'CONTACT ME', x: 360, y: 410, w: 250, h: 66, target: '#footer' },
-] as const;
-
-interface ScreenState {
-  on: boolean;
-  bootStart: number;
-  typed: string;
-  /** Result line of the last command typed on the keyboard. */
-  output: string;
-  /** Real-keyboard typing is on (after clicking the screen). */
-  focus: boolean;
-  /** Show the "it's a cat!" popup until this timestamp. */
-  catUntil: number;
-  hover: string | null;
-}
-
 const clamp = (v: number, limit: number) => Math.max(-limit, Math.min(limit, v));
 const snap = (v: number, step: number, limit: number) => clamp(Math.round(v / step) * step, limit);
-
-/** Paints the CRT: boot log, then the hero content with clickable buttons and a typing prompt. */
-function drawScreen(ctx: CanvasRenderingContext2D, s: ScreenState, cursorOn: boolean) {
-  const forest = themeColor('forest');
-  const phosphor = themeColor('phosphor');
-  const ink = themeColor('ink');
-  const light = themeColor('beige-light');
-  const W = SCREEN_W;
-  const H = SCREEN_H;
-
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'alphabetic';
-
-  if (!s.on) {
-    ctx.fillStyle = '#050805';
-    ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = 'rgba(85,242,139,0.55)';
-    ctx.font = '40px "VT323", monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('screen off', W / 2, H / 2 - 10);
-    ctx.fillText('press the POWER button below', W / 2, H / 2 + 36);
-    return;
-  }
-
-  ctx.fillStyle = forest;
-  ctx.fillRect(0, 0, W, H);
-
-  const elapsed = performance.now() - s.bootStart;
-  if (elapsed < BOOT_MS) {
-    const lines = ['ZEN OS 1.0', 'checking memory.......OK', 'mounting portfolio....OK', 'feeding the cat.......OK', 'welcome.'];
-    ctx.fillStyle = phosphor;
-    ctx.font = '40px "VT323", monospace';
-    const shown = Math.floor((elapsed / BOOT_MS) * (lines.length + 1));
-    lines.slice(0, shown).forEach((line, i) => ctx.fillText(`> ${line}`, 40, 90 + i * 52));
-  } else {
-    // menu bar
-    ctx.fillStyle = light;
-    ctx.fillRect(0, 0, W, 44);
-    ctx.fillStyle = ink;
-    ctx.fillRect(0, 44, W, 3);
-    ctx.font = '30px "Pixelify Sans", monospace';
-    ctx.fillText('File   Edit   View   Special', 20, 32);
-
-    // status tag
-    ctx.fillStyle = phosphor;
-    ctx.fillRect(40, 78, 270, 40);
-    ctx.fillStyle = ink;
-    ctx.font = '30px "VT323", monospace';
-    ctx.fillText('■ OPEN TO WORK', 54, 108);
-
-    // title + role + blurb
-    ctx.font = '700 118px "Pixelify Sans", monospace';
-    ctx.fillStyle = light;
-    ctx.fillText('ZEN', 40, 240);
-    ctx.fillStyle = phosphor;
-    ctx.fillText('ZEN', 40 + ctx.measureText('ZEN').width, 240);
-
-    ctx.fillStyle = phosphor;
-    ctx.font = '42px "VT323", monospace';
-    ctx.fillText('Web Developer & Server Engineer', 40, 296);
-    ctx.fillStyle = light;
-    ctx.font = '32px "VT323", monospace';
-    ctx.fillText('Full-stack web, servers and AI automation.', 40, 346);
-    ctx.fillText('I build and ship reliable systems end to end.', 40, 382);
-
-    // buttons
-    SCREEN_BUTTONS.forEach((b) => {
-      const hot = s.hover === b.id;
-      ctx.fillStyle = ink;
-      ctx.fillRect(b.x + 6, b.y + 6, b.w, b.h);
-      ctx.fillStyle = hot ? phosphor : light;
-      ctx.fillRect(b.x, b.y, b.w, b.h);
-      ctx.strokeStyle = ink;
-      ctx.lineWidth = 4;
-      ctx.strokeRect(b.x, b.y, b.w, b.h);
-      ctx.fillStyle = ink;
-      ctx.font = '34px "Pixelify Sans", monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText(b.label, b.x + b.w / 2, b.y + 44);
-      ctx.textAlign = 'left';
-    });
-
-    // command line: last result above, prompt below
-    if (s.output) {
-      ctx.fillStyle = light;
-      ctx.font = '30px "VT323", monospace';
-      ctx.fillText(s.output, 40, 524);
-    }
-    ctx.fillStyle = phosphor;
-    ctx.font = '34px "VT323", monospace';
-    ctx.fillText(`> ${s.typed}${cursorOn ? '_' : ' '}`, 40, 566);
-    if (!s.typed && !s.output) {
-      ctx.fillStyle = 'rgba(236,233,221,0.45)';
-      ctx.fillText(s.focus ? '(typing... ENTER runs, ESC stops)' : '(click the screen and type: try "help")', 150, 566);
-    }
-  }
-
-  if (s.focus) {
-    ctx.strokeStyle = phosphor;
-    ctx.lineWidth = 6;
-    ctx.strokeRect(6, 54, W - 12, H - 60);
-  }
-
-  // `cat` command: you expected a file? It's a cat!
-  if (s.on && performance.now() < s.catUntil) {
-    const px = 100;
-    const py = 110;
-    const pw = 600;
-    const ph = 350;
-    const colors: Record<string, string> = { o: themeColor('calico'), y: themeColor('tabby'), g: phosphor, k: themeColor('blush'), w: '#ffffff' };
-    ctx.fillStyle = ink;
-    ctx.fillRect(px + 8, py + 8, pw, ph);
-    ctx.fillStyle = light;
-    ctx.fillRect(px, py, pw, ph);
-    ctx.fillStyle = themeColor('beige');
-    ctx.fillRect(px, py, pw, 44);
-    ctx.strokeStyle = ink;
-    ctx.lineWidth = 4;
-    ctx.strokeRect(px, py, pw, ph);
-    ctx.beginPath();
-    ctx.moveTo(px, py + 44);
-    ctx.lineTo(px + pw, py + 44);
-    ctx.stroke();
-    ctx.fillStyle = ink;
-    ctx.font = '30px "Pixelify Sans", monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('cat.txt', px + pw / 2, py + 32);
-    const frame = PET_FRAMES.idle;
-    const sc = 11;
-    const ox = px + (pw - frame[0].length * sc) / 2;
-    frame.forEach((row, y) =>
-      [...row].forEach((c, x) => {
-        if (!colors[c]) return;
-        ctx.fillStyle = colors[c];
-        ctx.fillRect(ox + x * sc, py + 66 + y * sc, sc, sc);
-      })
-    );
-    ctx.fillStyle = ink;
-    ctx.font = '32px "VT323", monospace';
-    ctx.fillText('you thought you were going to read a file?', px + pw / 2, py + 222 + 40);
-    ctx.font = '700 40px "Pixelify Sans", monospace';
-    ctx.fillText('nope. it is a cat!  =^..^=', px + pw / 2, py + 222 + 90);
-    ctx.textAlign = 'left';
-  }
-
-  // scanlines
-  ctx.fillStyle = 'rgba(0,0,0,0.22)';
-  for (let y = 0; y < H; y += 4) ctx.fillRect(0, y, W, 1);
-}
 
 function useScreen(ui: MutableRefObject<ScreenState>) {
   const canvas = useMemo(() => {
@@ -421,8 +250,11 @@ function PushButton({ position, size = 0.18, color, glyph, onPress }: { position
   );
 }
 
-function MacModel() {
-  const ui = useRef<ScreenState>({ on: true, bootStart: performance.now(), typed: '', output: '', focus: false, catUntil: 0, hover: null });
+function MacModel({ data }: { data: TermData }) {
+  const ui = useRef<ScreenState>(null as unknown as ScreenState);
+  if (!ui.current) ui.current = createScreen();
+  const dataRef = useRef(data);
+  dataRef.current = data;
   const { texture } = useScreen(ui);
   const [power, setPower] = useState(true);
   const [bright, setBright] = useState(2);
@@ -442,7 +274,7 @@ function MacModel() {
     if (!e.uv || !ui.current.on) return null;
     const px = e.uv.x * SCREEN_W;
     const py = (1 - e.uv.y) * SCREEN_H;
-    return SCREEN_BUTTONS.find((b) => px >= b.x && px <= b.x + b.w && py >= b.y && py <= b.y + b.h) ?? null;
+    return screenButtons(ui.current).find((b) => px >= b.x && px <= b.x + b.w && py >= b.y && py <= b.y + b.h) ?? null;
   };
 
   const togglePower = () => {
@@ -464,50 +296,34 @@ function MacModel() {
 
   const goTo = (selector: string) => document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth' });
 
-  /** Tiny command line: type a word on the keyboard, press ENTER. */
-  const runCommand = (raw: string): string => {
-    const cmd = raw.trim().toLowerCase();
-    // `cat <anything>` normally prints a file. Not here.
-    if (cmd === 'cat' || cmd.startsWith('cat ')) {
-      ui.current.catUntil = performance.now() + 5000;
-      window.dispatchEvent(new Event(CAT_EVENT));
-      return 'mrrp!';
-    }
-    switch (cmd) {
-      case '':
-        return '';
-      case 'help':
-        return 'try: projects skills experience contact cat <file> clear';
-      case 'projects':
-        goTo('#projects');
-        return 'opening projects...';
-      case 'skills':
-        goTo('#industries');
-        return 'opening skills...';
-      case 'experience':
-        goTo('#experience');
-        return 'opening experience...';
-      case 'contact':
-        goTo('#footer');
-        return 'opening contact...';
-      case 'clear':
-        return '';
-      default:
-        return `${cmd}: command not found (try help)`;
-    }
+  const runEffects = (effects: Effect[]) => {
+    effects.forEach((fx) => {
+      if (fx.type === 'scroll') goTo(fx.selector);
+      else if (fx.type === 'cat') {
+        ui.current.catUntil = performance.now() + 5000;
+        window.dispatchEvent(new Event(CAT_EVENT));
+      }
+    });
   };
 
+  /** A key from the 3D keyboard or the real one. ENTER runs the line, DEL erases. */
   const type = (c: string) => {
     const state = ui.current;
     if (!state.on) return;
-    if (c === '\n') {
-      state.catUntil = 0;
-      state.output = runCommand(state.typed);
-      state.typed = '';
-    } else if (c === '\b') {
-      state.typed = state.typed.slice(0, -1);
-    } else {
-      state.typed = (state.typed + c).slice(-26);
+    if (c === '\n') runEffects(submit(state, dataRef.current));
+    else typeChar(state, c);
+  };
+
+  /** Click on a button painted on the CRT. */
+  const pressScreenButton = (id: string) => {
+    const detail = ui.current.detail;
+    if (id === 'home-projects') goTo('#projects');
+    else if (id === 'home-contact') goTo('#footer');
+    else if (id === 'detail' && detail?.button) {
+      const { url, scrollTo } = detail.button;
+      if (scrollTo) goTo(scrollTo);
+      else if (url?.startsWith('mailto:')) window.location.href = url;
+      else if (url) window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -519,9 +335,16 @@ function MacModel() {
       if (!ui.current.focus) return;
       if (e.key === 'Escape') {
         ui.current.focus = false;
+        document.getElementById('mac-input')?.blur();
         return;
       }
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const scrollKeys: Record<string, number> = { ArrowUp: 1, ArrowDown: -1, PageUp: TERM_PAGE, PageDown: -TERM_PAGE };
+      if (e.key in scrollKeys) {
+        e.preventDefault();
+        scrollTerm(ui.current, scrollKeys[e.key]);
+        return;
+      }
       const c = e.key === 'Enter' ? '\n' : e.key === 'Backspace' ? '\b' : e.key.length === 1 ? e.key : null;
       if (c === null) return;
       e.preventDefault();
@@ -562,10 +385,12 @@ function MacModel() {
           if (e.delta > 5) return;
           const b = hitButton(e);
           if (b) {
-            document.querySelector(b.target)?.scrollIntoView({ behavior: 'smooth' });
+            pressScreenButton(b.id);
           } else if (ui.current.on) {
             ui.current.focus = true;
             ui.current.catUntil = 0;
+            // phones: focusing a hidden input brings up the on-screen keyboard
+            document.getElementById('mac-input')?.focus();
           }
         }}
         onPointerMove={(e) => {
@@ -660,7 +485,7 @@ function MacModel() {
   );
 }
 
-function Rig({ rot, dragging }: { rot: MutableRefObject<Rotation>; dragging: MutableRefObject<boolean> }) {
+function Rig({ rot, dragging, data }: { rot: MutableRefObject<Rotation>; dragging: MutableRefObject<boolean>; data: TermData }) {
   const group = useRef<Group>(null);
   const aspect = useThree((s) => s.size.width / s.size.height);
   const camera = useThree((s) => s.camera);
@@ -678,7 +503,7 @@ function Rig({ rot, dragging }: { rot: MutableRefObject<Rotation>; dragging: Mut
   });
   return (
     <group ref={group}>
-      <MacModel />
+      <MacModel data={data} />
     </group>
   );
 }
@@ -692,7 +517,8 @@ const hasWebGL = () => {
 };
 
 /** Draggable 3D Macintosh: turns ±25° sideways and ±8° up/down, snapping to small poses on release. */
-export default function Mac3D({ className = '' }: { className?: string }) {
+export default function Mac3D({ className = '', projects, experiences }: { className?: string } & TermData) {
+  const data = useMemo(() => ({ projects, experiences }), [projects, experiences]);
   const rot = useRef<Rotation>({ x: 0, y: 0 });
   const dragging = useRef(false);
   const last = useRef({ x: 0, y: 0 });
@@ -760,8 +586,24 @@ export default function Mac3D({ className = '' }: { className?: string }) {
         <ambientLight intensity={0.75} />
         <directionalLight position={[4, 6, 5]} intensity={1.5} />
         <directionalLight position={[-5, 2, -3]} intensity={0.6} />
-        <Rig rot={rot} dragging={dragging} />
+        <Rig rot={rot} dragging={dragging} data={data} />
       </Canvas>
+      {/* hidden field: focusing it raises the on-screen keyboard on phones; keys are read from window keydown */}
+      <input
+        id="mac-input"
+        aria-label="Type on the Mac"
+        autoComplete="off"
+        autoCapitalize="off"
+        autoCorrect="off"
+        spellCheck={false}
+        className="absolute bottom-0 left-0 size-px opacity-0 pointer-events-none"
+        onInput={(e) => {
+          // virtual keyboards that report key "Unidentified": replay the typed text as key presses
+          const value = e.currentTarget.value;
+          e.currentTarget.value = '';
+          [...value].forEach((ch) => window.dispatchEvent(new KeyboardEvent('keydown', { key: ch })));
+        }}
+      />
       <p className="b3 hidden sm:block absolute top-1 inset-x-0 text-center text-beige-light/70 pointer-events-none">
         <span className="cursor-blink">▮</span> drag to rotate · press the buttons &amp; keys
       </p>
