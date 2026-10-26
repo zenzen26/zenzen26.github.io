@@ -14,6 +14,12 @@ const socials = [
   { icon: LayoutDashboard, label: 'Tableau', href: 'https://public.tableau.com/app/profile/zenzen26/vizzes' },
 ];
 
+const resumesUpdated = new Date(__RESUME_UPDATED__).toLocaleDateString('en-AU', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+});
+
 export default function FooterResume() {
   const handleDownload = (file: string, name: string) => {
     const link = document.createElement('a');
@@ -58,7 +64,8 @@ export default function FooterResume() {
           </div>
 
           <MacWindow title="Resume Hub" className="text-ink" bodyClassName="p-5 sm:p-6">
-            <p className="b3 text-ink/60 mb-4">Click a disk to download.</p>
+            <p className="b3 text-ink/60">Click a disk to download.</p>
+            <p className="text-xs text-ink/50 mb-4">last updated {resumesUpdated}</p>
             <div className="grid grid-cols-3 gap-3">
               {resumes.map((resume) => (
                 <FloppyIcon

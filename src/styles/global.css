@@ -171,3 +171,40 @@ body, .b1, .b2, .b3, p, span, div, a, button, input, textarea, select, label {
     scroll-behavior: auto !important;
   }
 }
+
+/* ------------------------------------------------------------
+   Mickey-glove pixel cursors (public/cursors). Unlayered so they
+   win over Tailwind's cursor-* utilities. Hotspot = fingertip.
+   ------------------------------------------------------------ */
+html {
+  cursor: url('/cursors/glove.svg') 10 0, auto;
+}
+
+a,
+button,
+summary,
+select,
+[role='button'],
+.cursor-pointer,
+.cursor-zoom-in {
+  cursor: url('/cursors/glove.svg') 10 0, pointer;
+}
+
+.cursor-grab {
+  cursor: url('/cursors/glove-grab.svg') 16 10, grab;
+}
+
+.cursor-grabbing {
+  cursor: url('/cursors/glove-grab.svg') 16 10, grabbing;
+}
+
+/* three.js (drei useCursor) writes an inline cursor on <body> while hovering the 3D Mac */
+body[style*='cursor: pointer'],
+body[style*='cursor:pointer'] {
+  cursor: url('/cursors/glove.svg') 10 0, pointer !important;
+}
+
+body[style*='cursor: grab'],
+body[style*='cursor:grab'] {
+  cursor: url('/cursors/glove-grab.svg') 16 10, grab !important;
+}
