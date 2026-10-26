@@ -274,42 +274,89 @@ function drawCatPopup(ctx: CanvasRenderingContext2D) {
   ctx.textAlign = 'left';
 }
 
-let rickRoll: HTMLImageElement | undefined;
+interface DiskFrame {
+  canvas: HTMLCanvasElement;
+  /** How long this frame stays on screen, in ms. */
+  delay: number;
+}
+
+let diskFrames: DiskFrame[] | null = null;
+let diskLoading: Promise<void> | null = null;
+let diskTotalMs = 0;
 
 /**
- * The disk's contents. An animated GIF only advances while its <img> is in the page, so it
- * lives in <body> (invisible) and each frame of the screen is drawn from it. Fetched on first use:
- * it is a few MB, so it is not loaded until someone inserts the disk.
+ * The disk's contents: public/videos/rick-roll.gif, decoded frame by frame with gifuct-js and played back
+ * on our own clock. (Browsers only animate a GIF that is actually painted, so a hidden <img> drawn into the
+ * canvas can freeze on its first frame.) Loaded the first time the disk is inserted: it is a few MB.
  */
-function getRickRoll() {
-  if (!rickRoll) {
-    rickRoll = new Image();
-    rickRoll.src = '/videos/rick-roll.gif';
-    rickRoll.alt = '';
-    rickRoll.setAttribute('aria-hidden', 'true');
-    rickRoll.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none';
-    document.body.appendChild(rickRoll);
-  }
-  return rickRoll;
+function loadDisk() {
+  if (diskLoading) return;
+  diskLoading = (async () => {
+    const { parseGIF, decompressFrames } = await import('gifuct-js');
+    const buffer = await (await fetch('/videos/rick-roll.gif')).arrayBuffer();
+    const gif = parseGIF(buffer);
+    const patches = decompressFrames(gif, true);
+    const width = gif.lsd.width;
+    const height = gif.lsd.height;
+
+    // composite each patch onto a full-size canvas, honouring "clear to background" disposal
+    const full = document.createElement('canvas');
+    full.width = width;
+    full.height = height;
+    const fullCtx = full.getContext('2d')!;
+    const patch = document.createElement('canvas');
+    const patchCtx = patch.getContext('2d')!;
+    const frames: DiskFrame[] = [];
+
+    for (const f of patches) {
+      patch.width = f.dims.width;
+      patch.height = f.dims.height;
+      patchCtx.putImageData(new ImageData(f.patch, f.dims.width, f.dims.height), 0, 0);
+      fullCtx.drawImage(patch, f.dims.left, f.dims.top);
+
+      const snapshot = document.createElement('canvas');
+      snapshot.width = width;
+      snapshot.height = height;
+      snapshot.getContext('2d')!.drawImage(full, 0, 0);
+      frames.push({ canvas: snapshot, delay: Math.max(20, f.delay || 50) });
+
+      if (f.disposalType === 2) fullCtx.clearRect(f.dims.left, f.dims.top, f.dims.width, f.dims.height);
+    }
+    diskTotalMs = frames.reduce((sum, f) => sum + f.delay, 0);
+    diskFrames = frames;
+  })().catch(() => {
+    diskLoading = null; // try again on the next insert
+  });
 }
 
 function drawRickRoll(ctx: CanvasRenderingContext2D) {
-  const img = getRickRoll();
+  loadDisk();
   ctx.fillStyle = '#000000';
   ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
-  if (img.complete && img.naturalWidth) {
-    // cover the whole tube, cropping top and bottom
-    const scale = Math.max(SCREEN_W / img.naturalWidth, SCREEN_H / img.naturalHeight);
-    const w = img.naturalWidth * scale;
-    const h = img.naturalHeight * scale;
-    ctx.drawImage(img, (SCREEN_W - w) / 2, (SCREEN_H - h) / 2, w, h);
-  } else {
+
+  if (!diskFrames || !diskTotalMs) {
     ctx.fillStyle = themeColor('phosphor');
     ctx.font = '40px "VT323", monospace';
     ctx.textAlign = 'center';
     ctx.fillText('reading disk...', SCREEN_W / 2, SCREEN_H / 2);
     ctx.textAlign = 'left';
+    return;
   }
+
+  // pick the frame for "now" and loop forever
+  let t = performance.now() % diskTotalMs;
+  let frame = diskFrames[0];
+  for (const f of diskFrames) {
+    frame = f;
+    if (t < f.delay) break;
+    t -= f.delay;
+  }
+
+  // cover the whole tube, cropping top and bottom
+  const scale = Math.max(SCREEN_W / frame.canvas.width, SCREEN_H / frame.canvas.height);
+  const w = frame.canvas.width * scale;
+  const h = frame.canvas.height * scale;
+  ctx.drawImage(frame.canvas, (SCREEN_W - w) / 2, (SCREEN_H - h) / 2, w, h);
 }
 
 /** Paints the whole CRT: power-off, boot log, hero or terminal, focus ring, cat popup, scanlines. */
