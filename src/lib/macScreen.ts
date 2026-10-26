@@ -195,7 +195,7 @@ function drawTerminal(ctx: CanvasRenderingContext2D, s: ScreenState, cursorOn: b
     ctx.font = '30px "VT323", monospace';
     const end = s.lines.length - s.scroll;
     s.lines.slice(Math.max(0, end - TERM_LINES), end).forEach((line, i) => {
-      ctx.fillStyle = line.startsWith('zen@') ? phosphor : light;
+      ctx.fillStyle = line.includes('@mac:') ? phosphor : light;
       ctx.fillText(line, 40, 92 + i * 34);
     });
     if (!s.lines.length) {

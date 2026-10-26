@@ -47,7 +47,29 @@ const WIDTH = 54;
 const COLUMN = 27;
 
 export const pathOf = (cwd: Dir) => (cwd === '~' ? '~' : `~/${cwd}`);
-export const promptFor = (cwd: Dir) => `zen@mac:${pathOf(cwd)}$`;
+
+// Browsers do not expose the visitor's account name, so they tell the Mac with `login <name>`.
+const USER_KEY = 'zen-user';
+const USER_MAX = 16;
+
+export function getUser(): string {
+  try {
+    return localStorage.getItem(USER_KEY) || 'guest';
+  } catch {
+    return 'guest';
+  }
+}
+
+function setUser(name: string | null) {
+  try {
+    if (name) localStorage.setItem(USER_KEY, name);
+    else localStorage.removeItem(USER_KEY);
+  } catch {
+    /* storage blocked: the name just will not stick */
+  }
+}
+
+export const promptFor = (cwd: Dir) => `${getUser()}@mac:${pathOf(cwd)}$`;
 
 const PLACES: Record<string, string> = {
   top: '#hero',
@@ -222,7 +244,7 @@ export function runTerminal(raw: string, cwd: Dir, data: TermData): TermResult {
         'cd <dir>       projects work skills ..',
         'cat <file>     read a file here',
         'goto <place>   scroll the page',
-        'pwd whoami echo clear exit',
+        'pwd whoami login clear exit',
       ]);
     case 'ls':
     case 'dir':
@@ -255,14 +277,23 @@ export function runTerminal(raw: string, cwd: Dir, data: TermData): TermResult {
     case 'echo':
       return done([arg]);
     case 'whoami':
-      return done(['zen']);
+      return done([getUser()]);
+    case 'login':
+    case 'su': {
+      const name = arg.replace(/[^\w.-]/g, '').slice(0, USER_MAX).toLowerCase();
+      if (!name) return done(['usage: login <name>']);
+      setUser(name);
+      return done([`welcome, ${name}`]);
+    }
     case 'clear':
       return done([], [{ type: 'clear' }]);
-    case 'exit':
     case 'logout':
+      setUser(null);
+      return done(['you are now guest']);
+    case 'exit':
       return done([], [{ type: 'exit' }]);
     case 'sudo':
-      return done(['zen is not in the sudoers file.', 'This incident will be reported to the cat.']);
+      return done([`${getUser()} is not in the sudoers file.`, 'This incident will be reported to the cat.']);
     case 'rm':
       return done(['rm: cannot remove: Permission denied (nice try)']);
     default:
