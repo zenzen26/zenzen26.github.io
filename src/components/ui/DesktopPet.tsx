@@ -23,7 +23,7 @@ const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: r
 /**
  * The header's calico cat as a desktop pet: waddles along the bottom facing the way it is
  * heading, sometimes crawls up the side of the screen, can be picked up and dropped
- * (soft landing from low, a yelp from high, dizzy if swung around), meows when clicked,
+ * (soft landing from low, a "mew! >^<" from high, dizzy if swung around), meows when clicked,
  * and gets angry if spam-clicked.
  */
 export default function DesktopPet() {
@@ -186,8 +186,8 @@ export default function DesktopPet() {
   const land = (hard: boolean) => {
     const btn = hopRef.current;
     if (hard) {
-      // ouch: yelp, big squash, a dazed moment before getting up
-      say('yelp!', 1500);
+      // ouch: mew, big squash, a dazed moment before getting up
+      say('mew! >^<', 1500);
       setMode('hurt');
       if (btn) gsap.fromTo(btn, { scaleY: 0.55, transformOrigin: '50% 100%' }, { scaleY: 1, duration: 0.5, ease: 'bounce.out', clearProps: 'transform,transformOrigin' });
       timer.current = window.setTimeout(swing.current.dizzy ? daze : settle, 1300);
