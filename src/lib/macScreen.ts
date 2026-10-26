@@ -33,6 +33,8 @@ export interface ScreenState {
   detail: Detail | null;
   /** Real-keyboard typing is on (after clicking the screen). */
   focus: boolean;
+  /** A disk is in the drive (INSERT pressed): the CRT plays the Rick-roll. */
+  disk: boolean;
   /** Show the "it's a cat!" popup until this timestamp. */
   catUntil: number;
   hover: string | null;
@@ -48,6 +50,7 @@ export const createScreen = (): ScreenState => ({
   scroll: 0,
   detail: null,
   focus: false,
+  disk: false,
   catUntil: 0,
   hover: null,
 });
@@ -271,6 +274,44 @@ function drawCatPopup(ctx: CanvasRenderingContext2D) {
   ctx.textAlign = 'left';
 }
 
+let rickRoll: HTMLImageElement | undefined;
+
+/**
+ * The disk's contents. An animated GIF only advances while its <img> is in the page, so it
+ * lives in <body> (invisible) and each frame of the screen is drawn from it. Fetched on first use:
+ * it is a few MB, so it is not loaded until someone inserts the disk.
+ */
+function getRickRoll() {
+  if (!rickRoll) {
+    rickRoll = new Image();
+    rickRoll.src = '/videos/rick-roll.gif';
+    rickRoll.alt = '';
+    rickRoll.setAttribute('aria-hidden', 'true');
+    rickRoll.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none';
+    document.body.appendChild(rickRoll);
+  }
+  return rickRoll;
+}
+
+function drawRickRoll(ctx: CanvasRenderingContext2D) {
+  const img = getRickRoll();
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
+  if (img.complete && img.naturalWidth) {
+    // cover the whole tube, cropping top and bottom
+    const scale = Math.max(SCREEN_W / img.naturalWidth, SCREEN_H / img.naturalHeight);
+    const w = img.naturalWidth * scale;
+    const h = img.naturalHeight * scale;
+    ctx.drawImage(img, (SCREEN_W - w) / 2, (SCREEN_H - h) / 2, w, h);
+  } else {
+    ctx.fillStyle = themeColor('phosphor');
+    ctx.font = '40px "VT323", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('reading disk...', SCREEN_W / 2, SCREEN_H / 2);
+    ctx.textAlign = 'left';
+  }
+}
+
 /** Paints the whole CRT: power-off, boot log, hero or terminal, focus ring, cat popup, scanlines. */
 export function drawScreen(ctx: CanvasRenderingContext2D, s: ScreenState, cursorOn: boolean) {
   const W = SCREEN_W;
@@ -301,6 +342,8 @@ export function drawScreen(ctx: CanvasRenderingContext2D, s: ScreenState, cursor
     ctx.font = '40px "VT323", monospace';
     const shown = Math.floor((elapsed / BOOT_MS) * (lines.length + 1));
     lines.slice(0, shown).forEach((line, i) => ctx.fillText(`> ${line}`, 40, 90 + i * 52));
+  } else if (s.disk) {
+    drawRickRoll(ctx);
   } else if (s.mode === 'term') {
     drawTerminal(ctx, s, cursorOn);
   } else {

@@ -17,6 +17,9 @@ const SNAP_STEP_Y = (12.5 * Math.PI) / 180;
 const SNAP_STEP_X = (4 * Math.PI) / 180;
 const IDLE_RETURN_MS = 5000;
 const BRIGHTNESS = [0.55, 0.8, 1];
+/** The floppy rests on the desk beside the Mac until INSERT is pressed. */
+const DISK_DESK: [number, number, number] = [-2.35, -1.33, 0.9];
+const DISK_SLOT_Y = -0.74;
 
 interface Rotation { x: number; y: number }
 
@@ -93,9 +96,9 @@ function Wire({ points, radius = 0.03 }: { points: [number, number, number][]; r
   );
 }
 
-type Glyph = 'power' | 'eject';
+type Glyph = 'power' | 'eject' | 'insert';
 
-/** Paints a transparent-background icon (power symbol / eject triangle) as a texture. */
+/** Paints a transparent-background icon (power symbol / eject or insert triangle) as a texture. */
 function useGlyphTexture(kind: Glyph) {
   return useMemo(() => {
     const c = document.createElement('canvas');
@@ -113,11 +116,19 @@ function useGlyphTexture(kind: Glyph) {
       g.moveTo(64, 20);
       g.lineTo(64, 68);
       g.stroke();
-    } else {
+    } else if (kind === 'eject') {
       g.beginPath();
       g.moveTo(64, 26);
       g.lineTo(104, 76);
       g.lineTo(24, 76);
+      g.closePath();
+      g.fill();
+      g.fillRect(24, 92, 80, 16);
+    } else {
+      g.beginPath();
+      g.moveTo(24, 22);
+      g.lineTo(104, 22);
+      g.lineTo(64, 72);
       g.closePath();
       g.fill();
       g.fillRect(24, 92, 80, 16);
@@ -262,7 +273,8 @@ function MacModel({ data }: { data: TermData }) {
   const [knobHover, setKnobHover] = useState(false);
   const disk = useRef<Group>(null);
   const knob = useRef<Mesh>(null);
-  const ejected = useRef(false);
+  const diskBusy = useRef(false);
+  const [diskIn, setDiskIn] = useState(false);
   useCursor(screenHover || knobHover);
 
   const beige = themeColor('plastic');
@@ -289,9 +301,32 @@ function MacModel({ data }: { data: TermData }) {
     if (knob.current) gsap.to(knob.current.rotation, { y: next * (Math.PI / 3), duration: 0.25 });
   };
 
-  const eject = () => {
-    ejected.current = !ejected.current;
-    if (disk.current) gsap.to(disk.current.position, { z: ejected.current ? 1.75 : 1.1, duration: 0.5, ease: 'back.out(1.6)' });
+  /**
+   * INSERT lifts the floppy off the desk and pushes it into the drive (the CRT then plays the
+   * disk); EJECT pops it out and sets it back on the desk. The button label alternates.
+   */
+  const toggleDisk = () => {
+    const group = disk.current;
+    if (!group || diskBusy.current) return;
+    diskBusy.current = true;
+    const done = () => { diskBusy.current = false; };
+    if (!diskIn) {
+      gsap
+        .timeline({ onComplete: done })
+        .to(group.position, { x: 0, y: DISK_SLOT_Y, z: 2.2, duration: 0.6, ease: 'power2.inOut' })
+        .to(group.position, { z: 1.1, duration: 0.35, ease: 'power1.in' })
+        .add(() => {
+          ui.current.disk = true;
+          setDiskIn(true);
+        });
+    } else {
+      ui.current.disk = false;
+      setDiskIn(false);
+      gsap
+        .timeline({ onComplete: done })
+        .to(group.position, { z: 2.0, duration: 0.4, ease: 'back.out(1.6)' })
+        .to(group.position, { x: DISK_DESK[0], y: DISK_DESK[1], z: DISK_DESK[2], duration: 0.7, ease: 'power2.inOut' });
+    }
   };
 
   const goTo = (selector: string) => document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth' });
@@ -415,8 +450,8 @@ function MacModel({ data }: { data: TermData }) {
         <boxGeometry args={[1.2, 0.07, 0.04]} />
         <meshStandardMaterial color={ink} />
       </mesh>
-      {/* floppy that slides out of the slot */}
-      <group ref={disk} position={[0, -0.74, 1.1]}>
+      {/* the floppy: on the desk by default, slides into the slot on INSERT */}
+      <group ref={disk} position={DISK_DESK}>
         <mesh>
           <boxGeometry args={[0.95, 0.04, 0.95]} />
           <meshStandardMaterial color={ink} roughness={0.5} />
@@ -434,8 +469,8 @@ function MacModel({ data }: { data: TermData }) {
         <boxGeometry args={[0.1, 0.1, 0.04]} />
         <meshStandardMaterial color={power ? themeColor('phosphor') : ink} emissive={power ? themeColor('phosphor') : '#000000'} emissiveIntensity={power ? 1.5 : 0} />
       </mesh>
-      <PushButton position={[0.95, -0.96, 1.24]} size={0.3} glyph="eject" color={light} onPress={eject} />
-      <Caption text="EJECT" position={[0.95, -1.14, 1.225]} />
+      <PushButton position={[0.95, -0.96, 1.24]} size={0.3} glyph={diskIn ? 'eject' : 'insert'} color={light} onPress={toggleDisk} />
+      <Caption text={diskIn ? 'EJECT' : 'INSERT'} position={[0.95, -1.14, 1.225]} />
       <Caption text="BRIGHT" position={[0.5, -1.14, 1.225]} />
       <mesh
         ref={knob}
