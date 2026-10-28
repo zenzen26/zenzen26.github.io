@@ -8,20 +8,13 @@
    Component-specific rules live in components (Tailwind utilities).
    ============================================================ */
 
+/* One weight only (it is already bold); the range keeps the browser from faking a heavier one. */
 @font-face {
-  font-family: 'Pixelify Sans';
+  font-family: 'Jersey 10';
   font-style: normal;
-  font-weight: 400;
+  font-weight: 400 700;
   font-display: swap;
-  src: url('/fonts/pixelify-sans-400.woff2') format('woff2');
-}
-
-@font-face {
-  font-family: 'Pixelify Sans';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url('/fonts/pixelify-sans-700.woff2') format('woff2');
+  src: url('/fonts/jersey-10-400.woff2') format('woff2');
 }
 
 @font-face {
@@ -46,7 +39,7 @@
   --color-ink: #0b0b0b;
   --color-black: #000000;
   --color-white: #ffffff;
-  --font-pixel: "Pixelify Sans", monospace;
+  --font-pixel: "Jersey 10", monospace;
   --font-term: "VT323", monospace;
   --breakpoint-4xl: 1920px;
 }
@@ -83,7 +76,7 @@ body {
 
 /* Typography: pixel headings (h1–h4), terminal body (b1–b3) */
 h1, h2, h3, h4, .h1, .h2, .h3, .h4 {
-  font-family: "Pixelify Sans", monospace;
+  font-family: "Jersey 10", monospace;
   font-weight: 700;
   line-height: 1.1;
   margin: 0;
@@ -103,7 +96,7 @@ body, .b1, .b2, .b3, p, span, div, a, button, input, textarea, select, label {
 .b2 { font-size: clamp(20px, 0.5vw + 14px, 24px); line-height: 1.25; }
 .b3 { font-size: clamp(17px, 0.3vw + 13px, 20px); line-height: 1.2; }
 
-.font-pixel { font-family: "Pixelify Sans", monospace; }
+.font-pixel { font-family: "Jersey 10", monospace; }
 
 /* Classic Mac beveled edges: raised (buttons, windows) and sunken (screens, fields). */
 @utility bevel-out {

@@ -38,7 +38,7 @@ component, file, or helper unless you have to.
   `src/lib/pixelCat.ts`.
 - **Where CSS goes**: shared (used by 2+ components) → `global.css`; used by
   one component → co-located `Component.css`.
-- **Typography**: pixel headings `h1–h4` (Pixelify Sans) and terminal body
+- **Typography**: pixel headings `h1–h4` (Jersey 10) and terminal body
   `b1–b3` (VT323), see `global.css`. Don't add inline font-size utilities.
 - **Reusable bases** (extend these, don't fork): `MacWindow` (every panel), `ModalOverlay`
   (every popup: portalled to <body>, X close button), `FloppyIcon` (resume downloads),

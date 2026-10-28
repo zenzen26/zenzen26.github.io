@@ -119,7 +119,7 @@ function drawButton(ctx: CanvasRenderingContext2D, b: ScreenButton, hot: boolean
   ctx.lineWidth = 4;
   ctx.strokeRect(b.x, b.y, b.w, b.h);
   ctx.fillStyle = ink;
-  ctx.font = '34px "Pixelify Sans", monospace';
+  ctx.font = '34px "Jersey 10", monospace';
   ctx.textAlign = 'center';
   ctx.fillText(b.label, b.x + b.w / 2, b.y + b.h / 2 + 12);
   ctx.textAlign = 'left';
@@ -131,7 +131,7 @@ function drawMenuBar(ctx: CanvasRenderingContext2D, left: string, right = '') {
   ctx.fillRect(0, 0, SCREEN_W, 44);
   ctx.fillStyle = ink;
   ctx.fillRect(0, 44, SCREEN_W, 3);
-  ctx.font = '30px "Pixelify Sans", monospace';
+  ctx.font = '30px "Jersey 10", monospace';
   ctx.fillText(left, 20, 32);
   if (right) {
     ctx.font = '26px "VT323", monospace';
@@ -154,7 +154,7 @@ function drawHome(ctx: CanvasRenderingContext2D, s: ScreenState, cursorOn: boole
   ctx.font = '30px "VT323", monospace';
   ctx.fillText('■ OPEN TO WORK', 54, 108);
 
-  ctx.font = '700 118px "Pixelify Sans", monospace';
+  ctx.font = '700 118px "Jersey 10", monospace';
   ctx.fillStyle = light;
   ctx.fillText('ZEN', 40, 240);
   ctx.fillStyle = phosphor;
@@ -188,7 +188,7 @@ function drawTerminal(ctx: CanvasRenderingContext2D, s: ScreenState, cursorOn: b
 
   if (s.detail) {
     ctx.fillStyle = phosphor;
-    ctx.font = '700 38px "Pixelify Sans", monospace';
+    ctx.font = '700 38px "Jersey 10", monospace';
     ctx.fillText(s.detail.title.length > 34 ? s.detail.title.slice(0, 33) + '…' : s.detail.title, 40, 100);
     ctx.fillStyle = light;
     ctx.font = '30px "VT323", monospace';
@@ -254,7 +254,7 @@ function drawCatPopup(ctx: CanvasRenderingContext2D) {
   ctx.stroke();
 
   ctx.fillStyle = ink;
-  ctx.font = '30px "Pixelify Sans", monospace';
+  ctx.font = '30px "Jersey 10", monospace';
   ctx.textAlign = 'center';
   ctx.fillText('cat.txt', px + pw / 2, py + 32);
 
@@ -269,7 +269,7 @@ function drawCatPopup(ctx: CanvasRenderingContext2D) {
   ctx.fillStyle = ink;
   ctx.font = '32px "VT323", monospace';
   ctx.fillText('you thought you were going to read a file?', px + pw / 2, py + 262);
-  ctx.font = '700 40px "Pixelify Sans", monospace';
+  ctx.font = '700 40px "Jersey 10", monospace';
   ctx.fillText('nope. it is a cat!  =^..^=', px + pw / 2, py + 312);
   ctx.textAlign = 'left';
 }

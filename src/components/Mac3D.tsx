@@ -53,7 +53,7 @@ function useScreen(ui: MutableRefObject<ScreenState>, active: boolean) {
     // Fonts must be ready before the first draw, otherwise canvas falls back to monospace.
     Promise.all([
       document.fonts.load('40px "VT323"'),
-      document.fonts.load('700 40px "Pixelify Sans"'),
+      document.fonts.load('700 40px "Jersey 10"'),
     ]).finally(redraw);
     if (!active) return;
     const id = window.setInterval(() => {
@@ -152,12 +152,12 @@ function Caption({ text, position }: { text: string; position: [number, number, 
       const g = (texture.image as HTMLCanvasElement).getContext('2d')!;
       g.clearRect(0, 0, 256, 64);
       g.fillStyle = themeColor('ink');
-      g.font = '700 38px "Pixelify Sans", monospace';
+      g.font = '700 38px "Jersey 10", monospace';
       g.textAlign = 'center';
       g.fillText(text, 128, 44);
       texture.needsUpdate = true;
     };
-    document.fonts.load('700 38px "Pixelify Sans"').finally(paint);
+    document.fonts.load('700 38px "Jersey 10"').finally(paint);
   }, [text, texture]);
   return (
     <mesh position={position}>
@@ -186,13 +186,13 @@ function useKeyLabel(text: string, aspect: number) {
       const g = c.getContext('2d')!;
       g.clearRect(0, 0, c.width, c.height);
       g.fillStyle = themeColor('ink');
-      g.font = `700 ${text.length > 1 ? 28 : 46}px "Pixelify Sans", monospace`;
+      g.font = `700 ${text.length > 1 ? 28 : 46}px "Jersey 10", monospace`;
       g.textAlign = 'center';
       g.textBaseline = 'middle';
       g.fillText(text.toUpperCase(), c.width / 2, c.height / 2 + 2);
       texture.needsUpdate = true;
     };
-    document.fonts.load('700 28px "Pixelify Sans"').finally(paint);
+    document.fonts.load('700 28px "Jersey 10"').finally(paint);
   }, [text, texture]);
   return texture;
 }
