@@ -49,7 +49,7 @@ export default function IndustriesTechStack({ className = '' }: { className?: st
         </MacWindow>
 
         <MacWindow title="System Profiler" reveal className="h-full" bodyClassName="flex flex-col sm:flex-row h-full">
-          <div className="flex sm:flex-col gap-1 p-2 border-b-2 sm:border-b-0 sm:border-r-2 border-ink bg-beige overflow-x-auto sm:w-44 shrink-0">
+          <div className="flex sm:flex-col gap-1 p-2 border-b-2 sm:border-b-0 sm:border-r-2 border-ink bg-beige overflow-x-auto sm:overflow-x-hidden sm:w-56 shrink-0">
             {categories.map((c) => (
               <button
                 key={c}
